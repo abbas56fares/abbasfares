@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap } from "../lib/gsap";
+import { gsap, ScrollTrigger } from "../lib/gsap";
 
 const NAV_LINKS = [
   { href: "#home", label: "Home" },
@@ -47,25 +47,24 @@ export default function NavBar() {
     { dependencies: [isOpen], scope: navRef },
   );
 
-  useEffect(() => {
-    const updateActiveSection = () => {
-      const scrollPosition = window.scrollY + 180;
-      let currentSection = "#home";
-
-      NAV_LINKS.forEach((link) => {
-        const section = document.querySelector(link.href) as HTMLElement | null;
-        if (section && section.offsetTop <= scrollPosition) {
-          currentSection = link.href;
-        }
+  useGSAP(() => {
+    // ScrollTrigger caches each section's position once (on create/refresh)
+    // instead of reading layout (offsetTop) on every scroll event, so this
+    // can't thrash layout the way a raw scroll listener did.
+    const triggers = NAV_LINKS.map((link) => {
+      const section = document.querySelector<HTMLElement>(link.href);
+      if (!section) return null;
+      return ScrollTrigger.create({
+        trigger: section,
+        start: "top 180px",
+        end: "bottom 180px",
+        onToggle: (self) => {
+          if (self.isActive) setActiveHref(link.href);
+        },
       });
+    });
 
-      setActiveHref(currentSection);
-    };
-
-    updateActiveSection();
-    window.addEventListener("scroll", updateActiveSection, { passive: true });
-
-    return () => window.removeEventListener("scroll", updateActiveSection);
+    return () => triggers.forEach((t) => t?.kill());
   }, []);
 
   return (
