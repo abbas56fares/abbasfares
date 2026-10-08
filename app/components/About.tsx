@@ -1,6 +1,5 @@
 "use client";
 
-import { useGSAP } from "@gsap/react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import {
@@ -9,7 +8,6 @@ import {
   FaMapMarkerAlt,
   FaRobot,
 } from "react-icons/fa";
-import { gsap } from "../lib/gsap";
 import { CV_DATA } from "./ChatBot";
 
 const QUICK_FACTS = [
@@ -35,60 +33,6 @@ export default function About() {
   const factsRef = useRef<HTMLDivElement>(null);
   const [flipped, setFlipped] = useState(false);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.set(headerRef.current, { opacity: 0, y: 24 });
-        gsap.to(headerRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: headerRef.current, start: "top 85%" },
-        });
-
-        gsap.set(photoRef.current, { opacity: 0, scale: 0.75, rotate: -8 });
-        gsap.to(photoRef.current, {
-          opacity: 1,
-          scale: 1,
-          rotate: 0,
-          duration: 0.9,
-          ease: "expo.out",
-          scrollTrigger: { trigger: photoRef.current, start: "top 85%" },
-        });
-
-        const bioChildren = bioRef.current
-          ? Array.from(bioRef.current.children)
-          : [];
-        gsap.set(bioChildren, { opacity: 0, y: 24 });
-        gsap.to(bioChildren, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.12,
-          ease: "power3.out",
-          scrollTrigger: { trigger: bioRef.current, start: "top 85%" },
-        });
-
-        const factChildren = factsRef.current
-          ? Array.from(factsRef.current.children)
-          : [];
-        gsap.set(factChildren, { opacity: 0, y: 16, scale: 0.95 });
-        gsap.to(factChildren, {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.5,
-          stagger: 0.08,
-          ease: "back.out(1.6)",
-          scrollTrigger: { trigger: factsRef.current, start: "top 90%" },
-        });
-      });
-    },
-    { scope: sectionRef },
-  );
 
   return (
     <section

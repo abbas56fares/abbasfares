@@ -1,8 +1,7 @@
 "use client";
 
-import { useGSAP } from "@gsap/react";
 import { useEffect, useRef, useState } from "react";
-import { gsap, SplitText } from "../lib/gsap";
+import { gsap } from "../lib/gsap";
 
 const ROLES = ["Laravel Full-Stack Developer", "PHP | REST APIs | Vue.js"];
 const TECH_STACK = [
@@ -100,71 +99,6 @@ export default function Hero() {
 
     return () => clearTimeout(timeout);
   }, [displayText, isDeleting, currentRole]);
-
-  // Entrance choreography
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        // Only the plain "Hi, I'm" line is char-split — splitting the gradient
-        // "Abbas Fares" line breaks its background-clip:text rendering (the
-        // nested per-char divs stop the gradient from painting through).
-        const split = new SplitText(greetingRef.current, { type: "chars" });
-
-        const ctaChildren = ctaRef.current
-          ? Array.from(ctaRef.current.children)
-          : [];
-
-        gsap.set(split.chars, { opacity: 0, y: 40, rotateX: -60 });
-        gsap.set(nameRef.current, { opacity: 0, y: 30 });
-        gsap.set(typewriterRef.current, { opacity: 0, y: 12 });
-        gsap.set(descRef.current, { opacity: 0, y: 16 });
-        gsap.set(ctaChildren, { opacity: 0, y: 24, scale: 0.92 });
-        gsap.set(pillsRef.current, { opacity: 0, y: 12 });
-
-        const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-        tl.to(split.chars, {
-          opacity: 1,
-          y: 0,
-          rotateX: 0,
-          duration: 0.8,
-          stagger: 0.015,
-        })
-          .to(nameRef.current, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5")
-          .to(
-            typewriterRef.current,
-            { opacity: 1, y: 0, duration: 0.5 },
-            "-=0.3",
-          )
-          .to(descRef.current, { opacity: 1, y: 0, duration: 0.6 }, "-=0.25")
-          .to(
-            ctaChildren,
-            { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.08 },
-            "-=0.3",
-          )
-          .to(pillsRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.2");
-
-        return () => split.revert();
-      });
-
-      mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(
-          [
-            greetingRef.current,
-            nameRef.current,
-            typewriterRef.current,
-            descRef.current,
-            ctaRef.current,
-            pillsRef.current,
-          ],
-          { opacity: 1, clearProps: "all" },
-        );
-      });
-    },
-    { scope: sectionRef },
-  );
 
   return (
     <section

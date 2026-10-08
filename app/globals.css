@@ -5,6 +5,17 @@
   --color-steel: #5483b3;
   --color-sky: #7da0ca;
   --color-ice: #c1e8ff;
+
+  /* Site-wide responsive categories. `md` (768px, Tailwind default) and
+     `lg` (1024px, Tailwind default) already line up exactly with our
+     Tablet and Wide lower bounds, so only the fourth category needs a new
+     variant — use `full-wide:` for anything that should only change on
+     large monitors (≥1440px).
+       Phone      : < 768px   (base, mobile-first — no prefix)
+       Tablet     : 768–1023px  → `md:`
+       Wide       : 1024–1439px → `lg:`
+       Full Wide  : ≥ 1440px    → `full-wide:` */
+  --breakpoint-full-wide: 90rem;
 }
 
 :root {
@@ -149,34 +160,12 @@ body {
 }
 
 /* Animations */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes fade-in {
   from {
     opacity: 0;
   }
   to {
     opacity: 1;
-  }
-}
-
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 
@@ -223,16 +212,8 @@ body {
 }
 
 /* Utility Classes */
-.animate-fade-in-up {
-  animation: fade-in-up 0.8s ease-out;
-}
-
 .animate-fade-in {
   animation: fade-in 1s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.8s ease-out;
 }
 
 .animate-float {
@@ -416,10 +397,6 @@ a {
   .animate-pulse-border,
   .animate-breathe,
   .animate-fade-in,
-  .animate-fade-in-up,
-  .animate-slide-in-right,
-  .animate-slide-up,
-  .animate-slide-in-left,
   .animate-glow-pulse,
   .animate-shimmer,
   .text-gradient,
@@ -434,20 +411,6 @@ a {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
-}
-
-/* Smooth Scroll Reveal */
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s ease;
-}
-
-.scroll-reveal.revealed {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 } /* end @layer base */

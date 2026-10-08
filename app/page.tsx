@@ -14,15 +14,16 @@ import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa";
 import { gsap, ScrollSmoother } from "./lib/gsap";
 
 export default function Home() {
-  const footerRef = useRef<HTMLElement>(null);
-  const footerSocialsRef = useRef<HTMLDivElement>(null);
   const smoothWrapperRef = useRef<HTMLDivElement>(null);
 
   // Buttery inertial scroll (keeps every ScrollTrigger in sync automatically).
-  // Disabled under reduced-motion so the page falls back to plain native scroll.
+  // Disabled under reduced-motion, and below the Tablet breakpoint (768px) so
+  // narrow/phone-width viewports always get plain native scroll — smoothTouch
+  // only skips the inertia easing for touch input, not for a narrow desktop
+  // window, which is where the inertia smoothing felt laggy.
   useGSAP(() => {
     const mm = gsap.matchMedia();
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
+    mm.add("(prefers-reduced-motion: no-preference) and (min-width: 768px)", () => {
       const smoother = ScrollSmoother.create({
         wrapper: "#smooth-wrapper",
         content: "#smooth-content",
@@ -53,34 +54,6 @@ export default function Home() {
     });
   }, { scope: smoothWrapperRef });
 
-  useGSAP(
-    () => {
-      gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.set(footerRef.current, { opacity: 0, y: 30 });
-        gsap.to(footerRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: footerRef.current, start: "top 95%" },
-        });
-
-        const icons = footerSocialsRef.current ? Array.from(footerSocialsRef.current.children) : [];
-        gsap.set(icons, { opacity: 0, scale: 0, rotate: -180 });
-        gsap.to(icons, {
-          opacity: 1,
-          scale: 1,
-          rotate: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "back.out(1.7)",
-          scrollTrigger: { trigger: footerSocialsRef.current, start: "top 95%" },
-        });
-      });
-    },
-    { scope: footerRef },
-  );
-
   return (
     <main className="relative w-full bg-[#0a0a0f] text-white overflow-x-hidden">
       {/* Noise texture overlay */}
@@ -100,7 +73,7 @@ export default function Home() {
           <Contact />
 
           {/* Footer */}
-          <footer ref={footerRef} className="relative w-full py-6 px-4 border-t border-white/5 overflow-hidden">
+          <footer className="relative w-full py-6 px-4 border-t border-white/5 overflow-hidden">
             {/* Background gradient */}
             <div className="absolute inset-0 bg-linear-to-t from-indigo-500/5 to-transparent" />
 
@@ -123,7 +96,7 @@ export default function Home() {
                 </div>
 
                 {/* Social Links */}
-                <div ref={footerSocialsRef} className="flex gap-4">
+                <div className="flex gap-4">
                   {[
                     { icon: <FaGithub className="w-7 h-7" />, href: "https://github.com/abbas56fares/", label: "GitHub" },
                     { icon: <FaLinkedin className="w-7 h-7 text-[#0077B5]" />, href: "https://www.linkedin.com/in/abbas-fares-934781304", label: "LinkedIn" },

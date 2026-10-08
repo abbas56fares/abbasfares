@@ -94,30 +94,11 @@ export default function Skills() {
   const pageCount = pages.length;
   const activePage = Math.min(page, pageCount - 1);
 
+  // No entrance animation — header/track render fully visible immediately.
+  // reducedRef is still needed by goTo()'s pagination-slide transition below.
   useGSAP(
     () => {
       reducedRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const mm = gsap.matchMedia();
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.set(headerRef.current, { opacity: 0, y: 24 });
-        gsap.to(headerRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: headerRef.current, start: "top 85%" },
-        });
-
-        gsap.set(trackRef.current, { opacity: 0, y: 30 });
-        gsap.to(trackRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: trackRef.current, start: "top 85%" },
-        });
-      });
     },
     { scope: containerRef },
   );
@@ -239,7 +220,9 @@ export default function Skills() {
           ))}
         </div>
 
-        {/* Page Dots */}
+        {/* Page Dots. The visual dot stays small; a padded, invisible hit
+            area brings the actual tap target to a touch-friendly size
+            without changing how the dots look. */}
         {pageCount > 1 && (
           <div className="flex items-center justify-center gap-2 mt-10">
             {pages.map((_, i) => (
@@ -247,10 +230,14 @@ export default function Skills() {
                 key={i}
                 onClick={() => goTo(i)}
                 aria-label={`Go to skills page ${i + 1}`}
-                className={`h-2 rounded-full transition-all ${
-                  i === activePage ? "w-8 bg-white" : "w-2 bg-white/40"
-                }`}
-              />
+                className="relative p-2.5"
+              >
+                <span
+                  className={`block h-2 rounded-full transition-all ${
+                    i === activePage ? "w-8 bg-white" : "w-2 bg-white/40"
+                  }`}
+                />
+              </button>
             ))}
           </div>
         )}

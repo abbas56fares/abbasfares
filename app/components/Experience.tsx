@@ -1,9 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
 import { FaBriefcase, FaGraduationCap, FaCertificate } from "react-icons/fa";
-import { gsap } from "../lib/gsap";
 
 const experience = {
   title: "Full-Stack Web Developer Intern",
@@ -33,55 +31,6 @@ export default function Experience() {
   const headerRef = useRef<HTMLDivElement>(null);
   const workCardRef = useRef<HTMLDivElement>(null);
   const bottomRowRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.set(headerRef.current, { opacity: 0, y: 24 });
-        gsap.to(headerRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: headerRef.current, start: "top 85%" },
-        });
-
-        gsap.set(workCardRef.current, { opacity: 0, x: -40 });
-        gsap.to(workCardRef.current, {
-          opacity: 1,
-          x: 0,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: workCardRef.current, start: "top 85%" },
-        });
-
-        const bullets = workCardRef.current?.querySelectorAll("li") ?? [];
-        gsap.set(bullets, { opacity: 0, x: -16 });
-        gsap.to(bullets, {
-          opacity: 1,
-          x: 0,
-          duration: 0.5,
-          stagger: 0.08,
-          ease: "power2.out",
-          scrollTrigger: { trigger: workCardRef.current, start: "top 75%" },
-        });
-
-        const bottomChildren = bottomRowRef.current ? Array.from(bottomRowRef.current.children) : [];
-        gsap.set(bottomChildren, { opacity: 0, y: 30 });
-        gsap.to(bottomChildren, {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          stagger: 0.15,
-          ease: "power3.out",
-          scrollTrigger: { trigger: bottomRowRef.current, start: "top 85%" },
-        });
-      });
-    },
-    { scope: sectionRef },
-  );
 
   return (
     <section

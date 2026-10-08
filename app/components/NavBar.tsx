@@ -20,20 +20,6 @@ export default function NavBar() {
 
   useGSAP(
     () => {
-      gsap.set(navRef.current, { y: -40, opacity: 0 });
-      gsap.to(navRef.current, {
-        y: 0,
-        opacity: 1,
-        duration: 0.7,
-        ease: "power3.out",
-        delay: 0.2,
-      });
-    },
-    { scope: navRef },
-  );
-
-  useGSAP(
-    () => {
       if (!isOpen || !mobilePanelRef.current) return;
       gsap.set(mobilePanelRef.current, { opacity: 0, y: -12, scale: 0.96 });
       gsap.to(mobilePanelRef.current, {
@@ -118,6 +104,9 @@ export default function NavBar() {
         {/* The Toggle Button: Styled as a circle when closed */}
         <button
           onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isOpen}
+          aria-controls="mobile-nav-panel"
           className={`glass flex items-center justify-center transition-all duration-300 active:scale-95 text-white border border-white/20
             ${isOpen ? "rounded-full p-2 mb-2" : "w-12 h-12 rounded-full"}`}
           style={{
@@ -154,6 +143,7 @@ export default function NavBar() {
         {isOpen && (
           <div
             ref={mobilePanelRef}
+            id="mobile-nav-panel"
             className="glass w-full rounded-2xl p-6 border border-white/20"
             style={{
               background: "rgba(19, 19, 26, 0.78)",
