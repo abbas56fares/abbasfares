@@ -1,30 +1,94 @@
 "use client";
 
+import { useGSAP } from "@gsap/react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import {
+  FaBriefcase,
+  FaGraduationCap,
+  FaMapMarkerAlt,
+  FaRobot,
+} from "react-icons/fa";
+import { gsap } from "../lib/gsap";
+import { CV_DATA } from "./ChatBot";
+
+const QUICK_FACTS = [
+  { icon: <FaMapMarkerAlt />, label: "Location", value: "Beirut, Lebanon" },
+  {
+    icon: <FaBriefcase />,
+    label: "Role",
+    value: "Laravel Full-Stack Developer",
+  },
+  {
+    icon: <FaGraduationCap />,
+    label: "Education",
+    value: "BS Computer Science, LIU",
+  },
+  { icon: <FaRobot />, label: "Focus", value: "AI-Powered Systems" },
+];
 
 export default function About() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [isFlipped, setIsFlipped] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const photoRef = useRef<HTMLDivElement>(null);
+  const bioRef = useRef<HTMLDivElement>(null);
+  const factsRef = useRef<HTMLDivElement>(null);
+  const [flipped, setFlipped] = useState(false);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("opacity-100", "translate-y-0");
-            entry.target.classList.remove("opacity-0", "translate-y-10");
-          }
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.set(headerRef.current, { opacity: 0, y: 24 });
+        gsap.to(headerRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: { trigger: headerRef.current, start: "top 85%" },
         });
-      },
-      { threshold: 0.1 },
-    );
 
-    const cards = sectionRef.current?.querySelectorAll(".reveal-card");
-    cards?.forEach((card) => observer.observe(card));
+        gsap.set(photoRef.current, { opacity: 0, scale: 0.75, rotate: -8 });
+        gsap.to(photoRef.current, {
+          opacity: 1,
+          scale: 1,
+          rotate: 0,
+          duration: 0.9,
+          ease: "expo.out",
+          scrollTrigger: { trigger: photoRef.current, start: "top 85%" },
+        });
 
-    return () => observer.disconnect();
-  }, []);
+        const bioChildren = bioRef.current
+          ? Array.from(bioRef.current.children)
+          : [];
+        gsap.set(bioChildren, { opacity: 0, y: 24 });
+        gsap.to(bioChildren, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.12,
+          ease: "power3.out",
+          scrollTrigger: { trigger: bioRef.current, start: "top 85%" },
+        });
+
+        const factChildren = factsRef.current
+          ? Array.from(factsRef.current.children)
+          : [];
+        gsap.set(factChildren, { opacity: 0, y: 16, scale: 0.95 });
+        gsap.to(factChildren, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.5,
+          stagger: 0.08,
+          ease: "back.out(1.6)",
+          scrollTrigger: { trigger: factsRef.current, start: "top 90%" },
+        });
+      });
+    },
+    { scope: sectionRef },
+  );
 
   return (
     <section
@@ -32,62 +96,225 @@ export default function About() {
       id="about"
       className="relative w-full py-32 px-4 overflow-hidden"
     >
-     
+      <div className="absolute top-1/3 -left-20 w-96 h-96 bg-steel/10 rounded-full blur-3xl animate-float" />
 
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-7xl font-black mb-4">
+        <div ref={headerRef} className="text-center mb-16">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ice mb-3">
+            Get To Know Me
+          </p>
+          <h2 className="heading-fluid font-black">
             About <span className="text-gradient">Me</span>
           </h2>
         </div>
+
         <div className="px-2">
-          {/* Bio Card - Wide */}
-          <div className="reveal-card transition-all duration-700 delay-100">
+          {/* Flip Card */}
+          <div className="relative" style={{ perspective: "2000px" }}>
+            <button
+              onClick={() => setFlipped((f) => !f)}
+              className={`absolute top-3 right-3 sm:top-6 sm:right-6 z-20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-linear-to-r from-indigo-500 to-purple-500 text-white text-[10px] sm:text-xs md:text-sm font-bold shadow-lg ${
+                flipped ? "" : "animate-breathe"
+              }`}
+            >
+              {flipped ? "Back" : "Read More"}
+            </button>
+
             <div
-              className="modern-card p-6 sm:p-8 lg:p-10"
+              className="relative transition-transform duration-700 motion-reduce:transition-none transform-3d"
               style={{
-                backdropFilter: "none",
-                WebkitBackdropFilter: "none",
-                transition: "none",
-                background: "rgba(255, 255, 255, 0.02)",
-                borderColor: "rgba(255, 255, 255, 0.05)",
-                boxShadow: "none",
+                transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
               }}
             >
-              <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
-                <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
-                  <div className="relative h-40 w-40 overflow-hidden rounded-2xl sm:h-48 sm:w-48 lg:h-80 lg:w-80 lg:rounded-3xl">
-                    <Image
-                      src="/images/pic.jpg"
-                      alt="My Photo"
-                      fill
-                      className="object-cover"
-                      priority
-                    />
+              {/* Front Face: Bio Card */}
+              <div className="modern-card pt-14 px-5 pb-6 sm:p-10 lg:p-12 backface-hidden [-webkit-backface-visibility:hidden]">
+                <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[auto_1fr]">
+                  {/* Photo */}
+                  <div
+                    className="flex justify-center lg:justify-start"
+                    style={{ perspective: "1000px" }}
+                  >
+                    <div ref={photoRef} className="relative">
+                      <div className="absolute -inset-1.5 rounded-[1.75rem] bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 opacity-70 blur-sm" />
+                      <div className="relative h-44 w-44 overflow-hidden rounded-3xl sm:h-56 sm:w-56 lg:h-72 lg:w-72 ring-2 ring-white/10">
+                        <Image
+                          src="/images/pic.jpg"
+                          alt="Abbas Fares"
+                          fill
+                          className="object-cover"
+                          priority
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bio */}
+                  <div ref={bioRef}>
+                    <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/3 px-3.5 py-1.5 text-xs font-semibold text-white">
+                      <span className="relative inline-flex w-2 h-2">
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping" />
+                        <span className="relative inline-flex w-2 h-2 rounded-full bg-green-400" />
+                      </span>
+                      Available for opportunities
+                    </div>
+                    <h3 className="mb-4 text-lg sm:text-3xl font-bold text-white">
+                      Laravel-focused Full-Stack Developer
+                    </h3>
+                    <p className="mb-8 text-sm leading-relaxed text-gray-400 sm:text-lg">
+                      Laravel-focused Full-Stack Developer with hands-on
+                      experience building secure, API-driven web applications,
+                      AI-powered systems, and backend services for real business
+                      needs. Skilled in PHP, Laravel, Vue.js, JavaScript,
+                      Python, React, and Next.js, with practical experience in
+                      MySQL, REST APIs, Docker, AI agents, and cloud hosting.
+                      Focused on building reliable, user-friendly applications
+                      that solve real problems and deliver clear, consistent
+                      value to users, clients, and teams.
+                    </p>
+
+                    {/* Quick Facts */}
+                    <div
+                      ref={factsRef}
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                    >
+                      {QUICK_FACTS.map((fact) => (
+                        <div
+                          key={fact.label}
+                          className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/3 px-4 py-3"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400">
+                            {fact.icon}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block text-xs uppercase tracking-wide text-gray-500">
+                              {fact.label}
+                            </span>
+                            <span className="block text-sm font-semibold text-white truncate">
+                              {fact.value}
+                            </span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <div
-                  key={isFlipped ? "career" : "story"}
-                  className="order-2 min-h-64 animate-fade-in lg:order-1"
-                >
-                  <h3 className="mb-4 text-3xl font-bold text-white text-center">
-                    {isFlipped ? "My Career" : "My Story"}
-                  </h3>
-                  <p className="mb-6 text-base leading-relaxed text-gray-400 sm:text-lg text-center">
-                    {isFlipped
-                      ? "I focus on building reliable full-stack products from concept to production, with strong attention to performance, maintainability, and user experience. I enjoy collaborating across teams, solving real business problems, and continuously learning modern technologies to deliver meaningful digital solutions."
-                      : "I'm a passionate full-stack developer with a deep love for creating elegant, efficient solutions to complex problems. My journey in tech started with a curiosity about how things work, and has evolved into building web applications, AI-powered systems, and secure digital experiences."}
+              {/* Back Face: CV */}
+              <div className="modern-card pt-14 px-5 pb-6 sm:p-10 absolute inset-0 overflow-y-auto no-scrollbar backface-hidden [-webkit-backface-visibility:hidden] transform-[rotateY(180deg)]">
+                <div className="space-y-2.5 sm:space-y-5 text-left">
+                  <div>
+                    <h3 className="text-lg sm:text-3xl font-bold text-white">
+                      {CV_DATA.name}
+                    </h3>
+                    <p className="text-indigo-400 text-[11px] sm:text-sm font-semibold mt-0.5 sm:mt-1">
+                      Laravel Full-Stack Developer
+                    </p>
+                    <p className="text-gray-500 text-[10px] sm:text-xs mt-1 sm:mt-2">
+                      {CV_DATA.email} · {CV_DATA.phone} · {CV_DATA.address}
+                    </p>
+                  </div>
+
+                  <p className="text-gray-400 text-[11px] sm:text-sm leading-snug sm:leading-relaxed">
+                    {CV_DATA.profile}
                   </p>
-                  <div className="flex justify-center lg:justify-start">
-                    <button
-                      type="button"
-                      onClick={() => setIsFlipped((prev) => !prev)}
-                      className="mt-4 inline-flex items-center justify-center rounded-xl border border-white bg-indigo-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/30"
-                    >
-                      {isFlipped ? "My Story" : "My Career"}
-                    </button>
+
+                  <div>
+                    <h4 className="text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">
+                      Experience
+                    </h4>
+                    <p className="text-white text-[11px] sm:text-sm font-semibold">
+                      {CV_DATA.experience.title} · {CV_DATA.experience.company}
+                    </p>
+                    <p className="text-gray-500 text-[10px] sm:text-xs mb-1 sm:mb-2">
+                      {CV_DATA.experience.duration}
+                    </p>
+                    <ul className="space-y-0.5 sm:space-y-1">
+                      {CV_DATA.experience.responsibilities.map((r) => (
+                        <li
+                          key={r}
+                          className="text-gray-400 text-[10px] sm:text-xs leading-snug sm:leading-relaxed flex gap-2"
+                        >
+                          <span className="text-indigo-400 shrink-0">▹</span>
+                          <span>{r}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">
+                      Education
+                    </h4>
+                    <p className="text-white text-[11px] sm:text-sm font-semibold">
+                      {CV_DATA.education.degree}
+                    </p>
+                    <p className="text-gray-500 text-[10px] sm:text-xs">
+                      {CV_DATA.education.institution} ·{" "}
+                      {CV_DATA.education.duration}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">
+                      Certifications
+                    </h4>
+                    <ul className="space-y-0.5 sm:space-y-1">
+                      {CV_DATA.certifications.map((c) => (
+                        <li key={c} className="text-gray-400 text-[10px] sm:text-xs">
+                          {c}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">
+                      Skills
+                    </h4>
+                    <p className="text-gray-400 text-[10px] sm:text-xs leading-snug sm:leading-relaxed">
+                      <span className="text-gray-300 font-semibold">
+                        Programming:{" "}
+                      </span>
+                      {CV_DATA.skills.programming.join(", ")}
+                      <br />
+                      <span className="text-gray-300 font-semibold">
+                        Frontend:{" "}
+                      </span>
+                      {CV_DATA.skills.frontend.join(", ")}
+                      <br />
+                      <span className="text-gray-300 font-semibold">
+                        Backend:{" "}
+                      </span>
+                      {CV_DATA.skills.backend.join(", ")}
+                      <br />
+                      <span className="text-gray-300 font-semibold">
+                        Databases:{" "}
+                      </span>
+                      {CV_DATA.skills.database.join(", ")}
+                      <br />
+                      <span className="text-gray-300 font-semibold">
+                        AI & ML:{" "}
+                      </span>
+                      {CV_DATA.skills.ai.join(", ")}
+                      <br />
+                      <span className="text-gray-300 font-semibold">
+                        Tools:{" "}
+                      </span>
+                      {CV_DATA.skills.tools.join(", ")}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">
+                      Languages
+                    </h4>
+                    <p className="text-gray-400 text-[10px] sm:text-xs">
+                      {Object.entries(CV_DATA.languages)
+                        .map(([lang, level]) => `${lang} (${level})`)
+                        .join(" · ")}
+                    </p>
                   </div>
                 </div>
               </div>

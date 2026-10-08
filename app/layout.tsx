@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Abbas Fares | Full-Stack Web Developer & AI ",
+  title: "Abbas Fares | Laravel Full-Stack Developer & AI Systems",
   description:
-    "Professional portfolio of Abbas Fares - Full-stack web developer specializing in Larave, Vue, React, Next.js, and AI/ML technologies.",
+    "Professional portfolio of Abbas Fares - Laravel full-stack developer specializing in PHP, Vue, React, Next.js, and AI-powered systems with RAG and AI agents.",
   keywords: [
     "Abbas Fares",
     "VILT Stack",
@@ -47,13 +47,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="theme-color" content="#0f0f0f" />
+        <meta name="theme-color" content="#021024" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased text-white`}
       >
         {children}
       </body>

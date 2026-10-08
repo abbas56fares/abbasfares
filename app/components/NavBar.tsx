@@ -1,17 +1,51 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "../lib/gsap";
 
 const NAV_LINKS = [
   { href: "#home", label: "Home" },
   { href: "#about", label: "About" },
-  { href: "#skills", label: "Skills" },
+  { href: "#experience", label: "Experience" },
   { href: "#projects", label: "Projects" },
+  { href: "#skills", label: "Skills" },
   { href: "#contact", label: "Contact" },
 ];
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeHref, setActiveHref] = useState("#home");
+  const navRef = useRef<HTMLElement>(null);
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      gsap.set(navRef.current, { y: -40, opacity: 0 });
+      gsap.to(navRef.current, {
+        y: 0,
+        opacity: 1,
+        duration: 0.7,
+        ease: "power3.out",
+        delay: 0.2,
+      });
+    },
+    { scope: navRef },
+  );
+
+  useGSAP(
+    () => {
+      if (!isOpen || !mobilePanelRef.current) return;
+      gsap.set(mobilePanelRef.current, { opacity: 0, y: -12, scale: 0.96 });
+      gsap.to(mobilePanelRef.current, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.35,
+        ease: "back.out(1.7)",
+      });
+    },
+    { dependencies: [isOpen], scope: navRef },
+  );
 
   useEffect(() => {
     const updateActiveSection = () => {
@@ -35,7 +69,10 @@ export default function NavBar() {
   }, []);
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4">
+    <nav
+      ref={navRef}
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4"
+    >
       {/* --- DESKTOP NAV: Stays as a wide bar --- */}
       <div
         className="hidden md:flex justify-center items-center glass rounded-full px-8 py-4 border border-white/20"
@@ -54,18 +91,26 @@ export default function NavBar() {
                 key={link.href}
                 href={link.href}
                 className={`relative font-medium transition-colors group ${
-                  isActive ? "text-indigo-400" : "text-gray-300 hover:text-indigo-400"
+                  isActive ? "text-indigo-400" : "text-gray-300"
                 }`}
               >
                 {link.label}
                 <span
                   className={`absolute -bottom-1 left-0 h-0.5 bg-linear-to-r from-indigo-500 to-purple-500 transition-all duration-300 ${
-                    isActive ? "w-full" : "w-0 group-hover:w-full"
+                    isActive ? "w-full" : "w-0"
                   }`}
                 />
               </a>
             );
           })}
+          <a
+            href="/Abbas-Fares-CV.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 px-4 py-2 rounded-full text-sm font-bold text-white bg-linear-to-r from-indigo-500 to-purple-500"
+          >
+            Resume
+          </a>
         </div>
       </div>
 
@@ -74,7 +119,7 @@ export default function NavBar() {
         {/* The Toggle Button: Styled as a circle when closed */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`glass flex items-center justify-center transition-all duration-300 active:scale-95 text-white hover:text-indigo-400 border border-white/20
+          className={`glass flex items-center justify-center transition-all duration-300 active:scale-95 text-white border border-white/20
             ${isOpen ? "rounded-full p-2 mb-2" : "w-12 h-12 rounded-full"}`}
           style={{
             background: "rgba(19, 19, 26, 0.72)",
@@ -109,7 +154,8 @@ export default function NavBar() {
         {/* The Menu Content: Opens as a full-width box */}
         {isOpen && (
           <div
-            className="glass w-full rounded-2xl p-6 animate-fade-in border border-white/20"
+            ref={mobilePanelRef}
+            className="glass w-full rounded-2xl p-6 border border-white/20"
             style={{
               background: "rgba(19, 19, 26, 0.78)",
               backdropFilter: "blur(30px) saturate(180%)",
@@ -126,18 +172,27 @@ export default function NavBar() {
                     href={link.href}
                     onClick={() => setIsOpen(false)}
                     className={`relative font-medium transition-colors group ${
-                      isActive ? "text-indigo-400" : "text-gray-300 hover:text-indigo-400"
+                      isActive ? "text-indigo-400" : "text-gray-300"
                     }`}
                   >
                     {link.label}
                     <span
                       className={`absolute -bottom-1 left-0 h-0.5 bg-linear-to-r from-indigo-500 to-purple-500 transition-all duration-300 ${
-                        isActive ? "w-full" : "w-0 group-hover:w-full"
+                        isActive ? "w-full" : "w-0"
                       }`}
                     />
                   </a>
                 );
               })}
+              <a
+                href="/Abbas-Fares-CV.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
+                className="mt-2 px-4 py-2 rounded-xl text-sm font-bold text-white text-center bg-linear-to-r from-indigo-500 to-purple-500"
+              >
+                Resume
+              </a>
             </div>
           </div>
         )}

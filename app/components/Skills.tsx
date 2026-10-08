@@ -1,12 +1,16 @@
 "use client";
 
-import { JSX, useEffect, useRef, useState } from "react";
-import { 
-  SiReact, SiNextdotjs, SiTypescript, SiVuedotjs, 
-  SiNodedotjs, SiExpress, SiLaravel, SiMysql, 
-  SiPython, SiGit, SiDocker
+import { JSX, useMemo, useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import {
+  SiReact, SiNextdotjs, SiVuedotjs, SiTailwindcss,
+  SiLaravel, SiPhp, SiNodedotjs, SiFastapi,
+  SiMysql, SiPostgresql, SiMongodb,
+  SiPython, SiGit, SiDocker,
 } from "react-icons/si";
-import { FaBrain, FaRocket, FaAws } from "react-icons/fa";
+import { FaBrain, FaSearch, FaRobot, FaCode, FaCloud } from "react-icons/fa";
+import { useIsMobile } from "../hooks/useIsMobile";
+import { gsap } from "../lib/gsap";
 
 interface Skill {
   name: string;
@@ -15,92 +19,181 @@ interface Skill {
   level: number;
 }
 
-interface SkillCategory {
-  title: string;
-  skills: Skill[];
-  gradient: string;
-}
-
-const skillCategories: SkillCategory[] = [
-  {
-    title: "Frontend",
-    gradient: "from-cyan-500 to-blue-500",
-    skills: [
-      { name: "React", icon: <SiReact />, color: "from-cyan-400 to-blue-500", level: 80 },
-      { name: "Next.js", icon: <SiNextdotjs />, color: "from-gray-600 to-gray-300", level: 75 },
-      { name: "TypeScript", icon: <SiTypescript />, color: "from-blue-500 to-blue-700", level: 65 },
-      { name: "Vue", icon: <SiVuedotjs />, color: "from-green-400 to-green-600", level: 80 },
-    ],
-  },
-  {
-    title: "Backend",
-    gradient: "from-green-500 to-emerald-600",
-    skills: [
-      { name: "Node.js", icon: <SiNodedotjs />, color: "from-green-500 to-green-700", level: 75 },
-      { name: "Express", icon: <SiExpress />, color: "from-gray-600 to-gray-300", level: 70 },
-      { name: "Laravel", icon: <SiLaravel />, color: "from-red-500 to-orange-600", level: 85 },
-      { name: "MySQL", icon: <SiMysql />, color: "from-blue-500 to-cyan-600", level: 90 },
-    ],
-  },
-  {
-    title: "AI/ML/NLP",
-    gradient: "from-purple-500 to-pink-500",
-    skills: [
-      { name: "Python", icon: <SiPython />, color: "from-yellow-500 to-blue-600", level: 75 },
-      { name: "NLP", icon: <FaBrain />, color: "from-purple-500 to-pink-500", level: 70 },
-    ],
-  },
-  {
-    title: "Tools",
-    gradient: "from-orange-500 to-red-500",
-    skills: [
-      { name: "Git", icon: <SiGit />, color: "from-orange-600 to-red-600", level: 70 },
-      { name: "AWS", icon: <FaAws />, color: "from-yellow-500 to-orange-500", level: 25 },
-      { name: "Docker", icon: <SiDocker />, color: "from-blue-500 to-cyan-600", level: 60 },
-      { name: "CI/CD", icon: <FaRocket />, color: "from-indigo-500 to-purple-600", level: 70 },
-    ],
-  },
+const skills: Skill[] = [
+  { name: "React", icon: <SiReact />, color: "from-cyan-400 to-blue-500", level: 80 },
+  { name: "Next.js", icon: <SiNextdotjs />, color: "from-gray-600 to-gray-300", level: 75 },
+  { name: "Vue", icon: <SiVuedotjs />, color: "from-green-400 to-green-600", level: 80 },
+  { name: "Tailwind CSS", icon: <SiTailwindcss />, color: "from-teal-400 to-cyan-600", level: 85 },
+  { name: "Laravel", icon: <SiLaravel />, color: "from-red-500 to-orange-600", level: 85 },
+  { name: "PHP", icon: <SiPhp />, color: "from-indigo-400 to-purple-600", level: 85 },
+  { name: "Node.js", icon: <SiNodedotjs />, color: "from-green-500 to-green-700", level: 70 },
+  { name: "FastAPI", icon: <SiFastapi />, color: "from-teal-500 to-emerald-600", level: 65 },
+  { name: "MySQL", icon: <SiMysql />, color: "from-blue-500 to-cyan-600", level: 85 },
+  { name: "PostgreSQL", icon: <SiPostgresql />, color: "from-blue-600 to-indigo-700", level: 65 },
+  { name: "MongoDB", icon: <SiMongodb />, color: "from-green-600 to-green-800", level: 55 },
+  { name: "Python", icon: <SiPython />, color: "from-yellow-500 to-blue-600", level: 75 },
+  { name: "AI Agents", icon: <FaBrain />, color: "from-purple-500 to-pink-500", level: 65 },
+  { name: "RAG", icon: <FaSearch />, color: "from-fuchsia-500 to-purple-600", level: 65 },
+  { name: "Ollama", icon: <FaRobot />, color: "from-slate-600 to-slate-800", level: 60 },
+  { name: "Git", icon: <SiGit />, color: "from-orange-600 to-red-600", level: 80 },
+  { name: "Docker", icon: <SiDocker />, color: "from-blue-500 to-cyan-600", level: 60 },
+  { name: "REST APIs", icon: <FaCode />, color: "from-indigo-500 to-purple-500", level: 85 },
+  { name: "Cloud Hosting", icon: <FaCloud />, color: "from-sky-500 to-blue-600", level: 55 },
 ];
+
+const STACK_SIZE = 4;
+const STACKS_PER_PAGE_DESKTOP = 3;
+const STACKS_PER_PAGE_MOBILE = 1;
+
+function SkillCard({ skill }: { skill: Skill }) {
+  return (
+    <div className="skill-card modern-card p-4 flex items-center gap-4">
+      <div
+        className={`w-8 h-8 rounded-xl bg-linear-to-br ${skill.color} flex items-center justify-center text-sm text-white shrink-0`}
+      >
+        {skill.icon}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1.5 gap-2">
+          <span className="text-white font-semibold text-sm truncate">{skill.name}</span>
+          <span className="text-gray-400 text-xs font-bold shrink-0">{skill.level}%</span>
+        </div>
+        <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+          <div
+            className={`skill-fill bg-linear-to-r ${skill.color} h-full w-full rounded-full origin-left scale-x-0`}
+            data-level={skill.level}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Skills() {
   const containerRef = useRef<HTMLElement>(null);
-  const [visibleSkills, setVisibleSkills] = useState<Set<string>>(new Set());
+  const headerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const reducedRef = useRef(false);
+  const isAnimatingRef = useRef(false);
+  const isMobile = useIsMobile(640);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const skillName = entry.target.getAttribute("data-skill");
+  const pages = useMemo(() => {
+    const stacksPerPage = isMobile ? STACKS_PER_PAGE_MOBILE : STACKS_PER_PAGE_DESKTOP;
+    const stacks: Skill[][] = [];
+    for (let i = 0; i < skills.length; i += STACK_SIZE) {
+      stacks.push(skills.slice(i, i + STACK_SIZE));
+    }
+    const chunks: Skill[][][] = [];
+    for (let i = 0; i < stacks.length; i += stacksPerPage) {
+      chunks.push(stacks.slice(i, i + stacksPerPage));
+    }
+    return chunks;
+  }, [isMobile]);
+  const pageCount = pages.length;
+  const activePage = Math.min(page, pageCount - 1);
 
-          if (entry.isIntersecting) {
-            if (skillName) {
-              setVisibleSkills((prev) => new Set(prev).add(skillName));
-            }
+  useGSAP(
+    () => {
+      reducedRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const mm = gsap.matchMedia();
 
-            entry.target.classList.add("opacity-100", "scale-100");
-            entry.target.classList.remove("opacity-0", "scale-95");
-          } else {
-            if (skillName) {
-              setVisibleSkills((prev) => {
-                const newSet = new Set(prev);
-                newSet.delete(skillName);
-                return newSet;
-              });
-            }
-
-            entry.target.classList.remove("opacity-100", "scale-100");
-            entry.target.classList.add("opacity-0", "scale-95");
-          }
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.set(headerRef.current, { opacity: 0, y: 24 });
+        gsap.to(headerRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: { trigger: headerRef.current, start: "top 85%" },
         });
+
+        gsap.set(trackRef.current, { opacity: 0, y: 30 });
+        gsap.to(trackRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: { trigger: trackRef.current, start: "top 85%" },
+        });
+      });
+    },
+    { scope: containerRef },
+  );
+
+  // Fill bars for the active page: set instantly under reduced motion,
+  // animate otherwise. Re-runs whenever pagination swaps the rendered cards.
+  useGSAP(
+    () => {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const fills = gsap.utils.toArray<HTMLElement>(".skill-fill", trackRef.current);
+
+      fills.forEach((fill) => {
+        const level = Number(fill.dataset.level) / 100;
+        if (reduced) {
+          gsap.set(fill, { scaleX: level });
+        } else {
+          gsap.fromTo(fill, { scaleX: 0 }, { scaleX: level, duration: 0.9, ease: "power3.out", delay: 0.1 });
+        }
+      });
+    },
+    { dependencies: [activePage], scope: containerRef },
+  );
+
+  const goTo = (next: number) => {
+    if (isAnimatingRef.current) return;
+    const clamped = (next + pageCount) % pageCount;
+    if (clamped === page) return;
+    const dir = next < page ? -1 : 1;
+
+    if (reducedRef.current || !trackRef.current) {
+      setPage(clamped);
+      return;
+    }
+
+    isAnimatingRef.current = true;
+    gsap.to(trackRef.current, {
+      opacity: 0,
+      x: -dir * 40,
+      duration: 0.25,
+      ease: "power2.in",
+      onComplete: () => {
+        setPage(clamped);
+        gsap.fromTo(
+          trackRef.current,
+          { opacity: 0, x: dir * 40 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.35,
+            ease: "power2.out",
+            onComplete: () => {
+              isAnimatingRef.current = false;
+            },
+          },
+        );
       },
-      { threshold: 0.8 },
-    );
+    });
+  };
 
-    const cards = containerRef.current?.querySelectorAll(".skill-card");
-    cards?.forEach((card) => observer.observe(card));
+  // Swipe left/right to navigate pages (touch-action: pan-y lets vertical
+  // page scroll keep working natively while we handle the horizontal axis).
+  const swipeRef = useRef({ x: 0, y: 0, active: false });
 
-    return () => observer.disconnect();
-  }, []);
+  const onSwipeStart = (e: React.PointerEvent) => {
+    swipeRef.current = { x: e.clientX, y: e.clientY, active: true };
+  };
+
+  const onSwipeEnd = (e: React.PointerEvent) => {
+    if (!swipeRef.current.active) return;
+    swipeRef.current.active = false;
+    const dx = e.clientX - swipeRef.current.x;
+    const dy = e.clientY - swipeRef.current.y;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      goTo(page + (dx < 0 ? 1 : -1));
+    }
+  };
 
   return (
     <section
@@ -109,92 +202,58 @@ export default function Skills() {
       className="relative w-full py-32 px-6 md:px-8 overflow-hidden"
     >
       {/* Background Effects */}
-      <div className="absolute top-1/3 -right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute top-1/3 -right-20 w-96 h-96 bg-sky/10 rounded-full blur-3xl animate-float" />
       <div
-        className="absolute bottom-1/3 -left-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-float"
+        className="absolute bottom-1/3 -left-20 w-96 h-96 bg-steel/10 rounded-full blur-3xl animate-float"
         style={{ animationDelay: "2s" }}
       />
 
       <div className="relative max-w-7xl mx-auto">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-5xl md:text-7xl font-black mb-4">
+        <div ref={headerRef} className="text-center mb-16">
+          <h2 className="heading-fluid font-black mb-4">
             My <span className="text-gradient">Skills</span>
           </h2>
           <br />
-          <p className="text-gray-400 text-lg md:text-xl">
+          <p className="text-gray-400 text-sm sm:text-lg md:text-xl">
             Technologies I work with daily
           </p>
         </div>
 
-        <div className="space-y-12">
-          {skillCategories.map((category, categoryIndex) => (
-            <div key={category.title} className="space-y-6">
-              <div className="flex items-center justify-center gap-4">
-                <div
-                  className={`h-1 w-12 bg-linear-to-r ${category.gradient} rounded-full`}
-                />
-                <h3
-                  className={`text-2xl md:text-3xl font-bold bg-linear-to-r ${category.gradient} bg-clip-text text-transparent`}
-                >
-                  {category.title}
-                </h3><div
-                  className={`h-1 w-12 bg-linear-to-r ${category.gradient} rounded-full`}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-                {category.skills.map((skill, index) => (
-                  <div
-                    key={skill.name}
-                    data-skill={skill.name} 
-                    className="skill-card transition-all duration-500 modern-card p-6 group spotlight cursor-pointer relative"
-                    style={{
-                      transitionDelay: `${categoryIndex * 100 + index * 50}ms`,
-                    }}
-                  >
-                    <div className="flex flex-col items-center text-center gap-3">
-                      <div
-                        className={`w-16 h-16 rounded-2xl bg-linear-to-br ${skill.color} flex items-center justify-center text-3xl `}
-                      >
-                        {skill.icon}
-                      </div>
-                      <h4 className="text-white font-bold text-lg text-center">
-                        {skill.name}
-                      </h4>
-                      <div
-                        className={`absolute inset-0 rounded-3xl bg-linear-to-br ${skill.color} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 -z-10`}
-                      />
-                    </div>
-
-                    <div className="flex justify-between items-end mt-4 mb-1">
-                      <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">
-                        Proficiency
-                      </span>
-                      <span className="text-gray-300 text-sm font-bold">
-                        {skill.level}%
-                      </span>
-                    </div>
-
-                    {/* The Progress Bar Track */}
-                    <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-                      {/* The Filled Bar */}
-                      <div
-                        className={`bg-linear-to-r ${skill.color} h-full rounded-full`}
-                        style={{
-                          // Fill from 0 to level only when visible
-                          width: visibleSkills.has(skill.name)
-                            ? `${skill.level}%`
-                            : "0%",
-                          transition: "width 3s ease-in-out",
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* Paginated Skills Carousel */}
+        <div
+          ref={trackRef}
+          onPointerDown={onSwipeStart}
+          onPointerUp={onSwipeEnd}
+          onPointerCancel={() => (swipeRef.current.active = false)}
+          className="flex flex-wrap justify-center gap-6 px-2 touch-pan-y"
+        >
+          {pages[activePage].map((stack, stackIdx) => (
+            <div
+              key={stackIdx}
+              className="flex flex-col gap-4 basis-full sm:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.333%-1rem)] sm:min-h-[340px]"
+            >
+              {stack.map((skill) => (
+                <SkillCard key={skill.name} skill={skill} />
+              ))}
             </div>
           ))}
         </div>
+
+        {/* Page Dots */}
+        {pageCount > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-10">
+            {pages.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Go to skills page ${i + 1}`}
+                className={`h-2 rounded-full transition-all ${
+                  i === activePage ? "w-8 bg-white" : "w-2 bg-white/40"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

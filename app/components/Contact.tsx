@@ -1,41 +1,14 @@
 "use client";
 
-import { JSX, useState } from "react";
-import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa";
+import { useEffect, useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "../lib/gsap";
 
 interface FormData {
   name: string;
   email: string;
   message: string;
 }
-
-interface SocialLink {
-  name: string;
-  icon: JSX.Element | string;
-  href: string;
-  color: string;
-}
-
-const socialLinks: SocialLink[] = [
-  {
-    name: "GitHub",
-    icon: <FaGithub className="w-9 h-9 hover:text-black transition-colors" />,
-    href: "https://github.com",
-    color: "from-white-500 to-gray-400",
-  },
-  {
-    name: "LinkedIn",
-    icon: <FaLinkedin className="w-9 h-9 text-[#0077B5] hover:opacity-80 transition-opacity" />,
-    href: "https://www.linkedin.com",
-    color: "from-blue-500 to-blue-700",
-  },
-  {
-    name: "Email",
-    icon: <FaEnvelope className="w-9 h-9 text-gray-600 hover:text-red-500 transition-colors" />,
-    href: "mailto:abbasfares56@gmail.com",
-    color: "from-pink-500 to-red-500",
-  },
-];
 
 export default function Contact() {
   const [formData, setFormData] = useState<FormData>({
@@ -44,6 +17,49 @@ export default function Contact() {
     message: "",
   });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+
+  const sectionRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const formCardRef = useRef<HTMLDivElement>(null);
+  const submitBtnRef = useRef<HTMLButtonElement>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.set(headerRef.current, { opacity: 0, y: 24 });
+        gsap.to(headerRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: { trigger: headerRef.current, start: "top 85%" },
+        });
+
+        gsap.set(formCardRef.current, { opacity: 0, y: 30, scale: 0.97 });
+        gsap.to(formCardRef.current, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: { trigger: formCardRef.current, start: "top 85%" },
+        });
+      });
+    },
+    { scope: sectionRef },
+  );
+
+  useEffect(() => {
+    if (status === "success" && submitBtnRef.current) {
+      gsap.fromTo(
+        submitBtnRef.current,
+        { scale: 1 },
+        { scale: 1.06, duration: 0.2, ease: "power2.out", yoyo: true, repeat: 1 },
+      );
+    }
+  }, [status]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -58,7 +74,7 @@ export default function Contact() {
     const formElement = e.currentTarget;
     const formDataObj = new FormData(formElement);
     
-    // @ts-ignore - formatting for Netlify body
+    // @ts-expect-error - FormData is iterable at runtime, lib.dom types lag behind
     const body = new URLSearchParams(formDataObj).toString();
 
     try {
@@ -83,29 +99,29 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="relative w-full py-32 px-6 overflow-hidden">
+    <section ref={sectionRef} id="contact" className="relative w-full py-32 px-6 overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+      <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-steel/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-ice/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
 
       <div className="relative max-w-5xl mx-auto">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-5xl md:text-7xl font-black mb-4">
+        <div ref={headerRef} className="text-center mb-16">
+          <h2 className="heading-fluid font-black mb-4">
             Get In <span className="text-gradient">Touch</span>
           </h2>
-          <p className="text-gray-400 text-lg md:text-xl">Let&apos;s build something amazing together</p>
+          <p className="text-gray-400 text-sm sm:text-lg md:text-xl">Let&apos;s build something amazing together</p>
         </div>
 
         <div className="grid">
-          <div className="glass modern-card p-8 spotlight">
+          <div ref={formCardRef} className="glass modern-card p-4 sm:p-8">
             {/* NETLIFY FORM CONFIGURATION */}
-            <form 
-              name="contact" 
-              method="POST" 
-              data-netlify="true" 
+            <form
+              name="contact"
+              method="POST"
+              data-netlify="true"
               data-netlify-honeypot="bot-field"
-              onSubmit={handleSubmit} 
-              className="space-y-6"
+              onSubmit={handleSubmit}
+              className="space-y-3 sm:space-y-6"
             >
               {/* Hidden fields for Netlify */}
               <input type="hidden" name="form-name" value="contact" />
@@ -114,7 +130,7 @@ export default function Contact() {
               </p>
 
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">Name</label>
                 <input
                   type="text"
                   id="name"
@@ -122,13 +138,13 @@ export default function Contact() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 glass rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-left"
+                  className="w-full px-3 py-2.5 sm:px-4 sm:py-3 glass rounded-xl text-white placeholder-gray-500 focus:border-sky focus:outline-none focus:ring-2 focus:ring-sky/50 transition-all text-left"
                   placeholder="Your name"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">Email</label>
                 <input
                   type="email"
                   id="email"
@@ -136,40 +152,41 @@ export default function Contact() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 glass rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-left"
+                  className="w-full px-3 py-2.5 sm:px-4 sm:py-3 glass rounded-xl text-white placeholder-gray-500 focus:border-sky focus:outline-none focus:ring-2 focus:ring-sky/50 transition-all text-left"
                   placeholder="your@email.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                <label htmlFor="message" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">Message</label>
                 <textarea
                   id="message"
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
                   required
-                  rows={5}
-                  className="w-full px-4 py-3 glass rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none text-left"
+                  rows={4}
+                  className="w-full px-3 py-2.5 sm:px-4 sm:py-3 glass rounded-xl text-white placeholder-gray-500 focus:border-sky focus:outline-none focus:ring-2 focus:ring-sky/50 transition-all resize-none text-left h-28 sm:h-36"
                   placeholder="Your message..."
                 />
               </div>
 
               <button
+                ref={submitBtnRef}
                 type="submit"
                 disabled={status === "sending"}
-                className="w-full glass py-4 px-6 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl text-white font-bold text-lg hover:shadow-2xl hover:shadow-indigo-500/50 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="w-full glass py-2.5 px-4 sm:py-4 sm:px-6 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl text-white font-bold text-sm sm:text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === "sending" ? "Sending..." : status === "success" ? "Message Sent! ✓" : status === "error" ? "Error! Try Again" : "Send Message"}
               </button>
 
               {status === "success" && (
-                <div className="text-center text-green-400 animate-fade-in font-medium">
+                <div className="text-center text-green-400 animate-fade-in font-medium text-sm sm:text-base">
                   Thank you! I&apos;ll get back to you soon.
                 </div>
               )}
               {status === "error" && (
-                <div className="text-center text-red-400 animate-fade-in font-medium">
+                <div className="text-center text-red-400 animate-fade-in font-medium text-sm sm:text-base">
                   Something went wrong. Please try again or email me directly.
                 </div>
               )}

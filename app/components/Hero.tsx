@@ -1,23 +1,73 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import { useEffect, useRef, useState } from "react";
+import { gsap, SplitText } from "../lib/gsap";
+
+const ROLES = ["Laravel Full-Stack Developer", "PHP | REST APIs | Vue.js"];
+const TECH_STACK = [
+  "Laravel",
+  "Vue",
+  "React",
+  "Next.js",
+  "TypeScript",
+  "Node.js",
+  "Python",
+  "AI/ML",
+];
+// Repeated enough times that at least two full copies always exceed the
+// widest realistic viewport, so the loop never shows trailing empty space
+// before it resets (see CLAUDE.md "Known issues" for the math).
+const MARQUEE_REPEAT = 8;
 
 export default function Hero() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const roles = ["Full-Stack Developer", "Problem Solver"];
-
   const [currentRole, setCurrentRole] = useState(0);
 
-  // Mouse parallax effect
+  const sectionRef = useRef<HTMLElement>(null);
+  const orb1Ref = useRef<HTMLDivElement>(null);
+  const orb2Ref = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const greetingRef = useRef<HTMLSpanElement>(null);
+  const nameRef = useRef<HTMLSpanElement>(null);
+  const typewriterRef = useRef<HTMLDivElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const pillsRef = useRef<HTMLDivElement>(null);
+  const primaryCtaRef = useRef<HTMLAnchorElement>(null);
+
+  // Mouse parallax on the gradient orbs (compositor-only, no React re-render)
   useEffect(() => {
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduced) return;
+
+    const x1 = gsap.quickTo(orb1Ref.current, "x", {
+      duration: 0.6,
+      ease: "power3.out",
+    });
+    const y1 = gsap.quickTo(orb1Ref.current, "y", {
+      duration: 0.6,
+      ease: "power3.out",
+    });
+    const x2 = gsap.quickTo(orb2Ref.current, "x", {
+      duration: 0.6,
+      ease: "power3.out",
+    });
+    const y2 = gsap.quickTo(orb2Ref.current, "y", {
+      duration: 0.6,
+      ease: "power3.out",
+    });
+
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 30 - 15,
-        y: (e.clientY / window.innerHeight) * 30 - 15,
-      });
+      const px = (e.clientX / window.innerWidth) * 30 - 15;
+      const py = (e.clientY / window.innerHeight) * 30 - 15;
+      x1(px);
+      y1(py);
+      x2(-px);
+      y2(-py);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -26,7 +76,7 @@ export default function Hero() {
 
   // Typewriter effect
   useEffect(() => {
-    const role = roles[currentRole];
+    const role = ROLES[currentRole];
     let timeout: NodeJS.Timeout;
 
     if (!isDeleting && displayText.length < role.length) {
@@ -44,73 +94,148 @@ export default function Hero() {
     } else if (isDeleting && displayText.length === 0) {
       timeout = setTimeout(() => {
         setIsDeleting(false);
-        setCurrentRole((prev) => (prev + 1) % roles.length);
+        setCurrentRole((prev) => (prev + 1) % ROLES.length);
       }, 0);
     }
 
     return () => clearTimeout(timeout);
   }, [displayText, isDeleting, currentRole]);
 
+  // Entrance choreography
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // Only the plain "Hi, I'm" line is char-split — splitting the gradient
+        // "Abbas Fares" line breaks its background-clip:text rendering (the
+        // nested per-char divs stop the gradient from painting through).
+        const split = new SplitText(greetingRef.current, { type: "chars" });
+
+        const ctaChildren = ctaRef.current
+          ? Array.from(ctaRef.current.children)
+          : [];
+
+        gsap.set(split.chars, { opacity: 0, y: 40, rotateX: -60 });
+        gsap.set(nameRef.current, { opacity: 0, y: 30 });
+        gsap.set(typewriterRef.current, { opacity: 0, y: 12 });
+        gsap.set(descRef.current, { opacity: 0, y: 16 });
+        gsap.set(ctaChildren, { opacity: 0, y: 24, scale: 0.92 });
+        gsap.set(pillsRef.current, { opacity: 0, y: 12 });
+
+        const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+
+        tl.to(split.chars, {
+          opacity: 1,
+          y: 0,
+          rotateX: 0,
+          duration: 0.8,
+          stagger: 0.015,
+        })
+          .to(nameRef.current, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5")
+          .to(
+            typewriterRef.current,
+            { opacity: 1, y: 0, duration: 0.5 },
+            "-=0.3",
+          )
+          .to(descRef.current, { opacity: 1, y: 0, duration: 0.6 }, "-=0.25")
+          .to(
+            ctaChildren,
+            { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.08 },
+            "-=0.3",
+          )
+          .to(pillsRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.2");
+
+        return () => split.revert();
+      });
+
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(
+          [
+            greetingRef.current,
+            nameRef.current,
+            typewriterRef.current,
+            descRef.current,
+            ctaRef.current,
+            pillsRef.current,
+          ],
+          { opacity: 1, clearProps: "all" },
+        );
+      });
+    },
+    { scope: sectionRef },
+  );
+
   return (
     <section
+      ref={sectionRef}
       id="home"
-      className="relative min-h-screen w-full flex items-center justify-center px-4 pt-20 overflow-hidden"
+      className="relative min-h-screen w-full flex flex-col items-center justify-center px-4 pt-20 overflow-hidden"
     >
-      {/* Floating gradient orbs with parallax */}
+      {/* Floating gradient orbs with parallax (outer = GSAP parallax, inner = CSS float, so the two transforms don't fight on one element) */}
       <div
-        className="absolute top-1/4 left-1/4 w-96 h-96 bg-linear-to-r from-indigo-500/30 to-purple-500/30 rounded-full blur-3xl animate-float"
-        style={{
-          transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
-          transition: "transform 0.3s ease-out",
-        }}
-      />
+        ref={orb1Ref}
+        className="absolute top-1/4 left-1/4 will-change-transform"
+      >
+        <div className="w-96 h-96 bg-linear-to-r from-steel/30 to-sky/30 rounded-full blur-3xl animate-float" />
+      </div>
       <div
-        className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-linear-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-3xl animate-float"
-        style={{
-          transform: `translate(${-mousePosition.x}px, ${-mousePosition.y}px)`,
-          transition: "transform 0.3s ease-out",
-          animationDelay: "1s",
-        }}
-      />
+        ref={orb2Ref}
+        className="absolute bottom-1/3 right-1/4 will-change-transform"
+      >
+        <div
+          className="w-96 h-96 bg-linear-to-r from-sky/30 to-ice/30 rounded-full blur-3xl animate-float"
+          style={{ animationDelay: "1s" }}
+        />
+      </div>
 
       <div className="relative z-10 max-w-6xl mx-auto text-center">
-        {/* Available badge */}
-        <div className="inline-flex items-center gap-2 py-2 px-4 rounded-full glass  animate-fade-in">
-          <span className="text-sm font-medium">
-            Available for opportunities
-          </span>
-        </div>
-
         {/* Main heading with gradient */}
-        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-8 leading-tight">
-          <span className="block text-white mb-2">Hi, I&apos;m</span>
-          <span className="block text-gradient">Abbas Fares</span>
+        <h1
+          ref={headlineRef}
+          className="hero-heading-fluid font-black mb-8 leading-tight"
+        >
+          <span ref={greetingRef} className="block text-white mb-2">
+            Hi, I&apos;m
+          </span>
+          <span ref={nameRef} className="block text-gradient">
+            Abbas Fares
+          </span>
         </h1>
 
         {/* Rotating role typewriter */}
-        <div className="h-12 md:h-16 mb-8 flex items-center justify-center">
-          <p className="text-2xl md:text-4xl font-bold text-white">
+        <div
+          ref={typewriterRef}
+          className="h-12 md:h-16 mb-8 flex items-center justify-center"
+        >
+          <p className="text-lg sm:text-2xl md:text-4xl font-bold text-white">
             {displayText}
             <span className="text-indigo-500 animate-pulse">|</span>
           </p>
         </div>
 
         {/* Description */}
-        <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
-          Building cutting-edge web applications with modern technologies.
-          <br />
-       
+        <p
+          ref={descRef}
+          className="text-gray-400 text-sm sm:text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed"
+        >
+          Building secure, API-driven web applications and AI-powered systems
+          with Laravel, React, and modern tooling.
         </p>
 
         {/* CTA buttons */}
-        <div className="flex gap-4 justify-center flex-wrap mt-5 mb-12">
+        <div
+          ref={ctaRef}
+          className="flex gap-4 justify-center flex-wrap mt-5 mb-12"
+        >
           <a
+            ref={primaryCtaRef}
             href="#projects"
-            className="group relative px-6 py-2 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl text-white font-bold text-lg hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/50"
+            className="group relative px-4 py-1.5 sm:px-6 sm:py-2 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl sm:rounded-2xl text-white font-bold text-sm sm:text-lg"
           >
             <span className="relative z-10">View My Work</span>
             <svg
-              className="inline-block w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"
+              className="inline-block w-4 h-4 sm:w-5 sm:h-5 ml-2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -125,32 +250,55 @@ export default function Hero() {
           </a>
 
           <a
+            href="/Abbas-Fares-CV.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group px-3 py-1.5 sm:px-4 sm:py-2 glass rounded-xl sm:rounded-2xl text-white font-bold text-sm sm:text-lg"
+          >
+            <svg
+              className="inline-block w-4 h-4 sm:w-5 sm:h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            Download CV
+          </a>
+
+          <a
             href="#contact"
-            className="px-4 py-2 glass rounded-2xl text-white font-bold text-lg hover:scale-105 transition-all duration-300 hover:border-indigo-500/50"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 glass rounded-xl sm:rounded-2xl text-white font-bold text-sm sm:text-lg"
           >
             Get In Touch
           </a>
         </div>
+      </div>
 
-        {/* Tech stack pills */}
-        <div className="flex flex-wrap gap-3 justify-center items-center">
-          {[
-            "Laravel",
-            "Vue",
-            "React",
-            "Next.js",
-            "TypeScript",
-            "Node.js",
-            "Python",
-            "AI/ML",
-          ].map((tech) => (
-            <span
-              key={tech}
-              className="px-4 py-2 glass rounded-full text-sm font-medium text-gray-300"
-            >
-              {tech}
-            </span>
-          ))}
+      {/* Tech stack marquee — full width, breaks out of the max-w-6xl content column */}
+      <div
+        ref={pillsRef}
+        className="relative z-10 self-stretch -mx-4 mt-8 glass py-3 overflow-hidden mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]"
+      >
+        <div
+          className="marquee-track flex w-max items-center gap-10"
+          style={{ "--marquee-repeat": MARQUEE_REPEAT } as React.CSSProperties}
+        >
+          {Array.from({ length: MARQUEE_REPEAT }, () => TECH_STACK)
+            .flat()
+            .map((tech, i) => (
+              <span
+                key={`${tech}-${i}`}
+                className="text-sm font-medium text-gray-300 whitespace-nowrap"
+              >
+                {tech}
+              </span>
+            ))}
         </div>
       </div>
     </section>

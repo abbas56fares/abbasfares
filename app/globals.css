@@ -1,23 +1,37 @@
 @import "tailwindcss";
 
+@theme {
+  --color-navy: #021024;
+  --color-steel: #5483b3;
+  --color-sky: #7da0ca;
+  --color-ice: #c1e8ff;
+}
+
 :root {
   /* Modern Color Palette */
-  --color-bg: #0a0a0f;
-  --color-surface: #13131a;
-  --color-primary: #6366f1;
-  --color-secondary: #ec4899;
-  --color-accent: #8b5cf6;
+  --color-bg: #021024;
+  --color-surface: #112438;
+  --color-primary: #5483b3;
+  --color-secondary: #7da0ca;
+  --color-accent: #c1e8ff;
   --color-text: #ffffff;
   --color-text-muted: #a1a1aa;
 
   /* Gradients */
   --gradient-mesh:
-    radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.3) 0px, transparent 50%),
-    radial-gradient(at 80% 0%, rgba(139, 92, 246, 0.3) 0px, transparent 50%),
-    radial-gradient(at 0% 50%, rgba(236, 72, 153, 0.3) 0px, transparent 50%),
-    radial-gradient(at 80% 100%, rgba(99, 102, 241, 0.2) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.2) 0px, transparent 50%);
+    radial-gradient(at 40% 20%, rgba(84, 131, 179, 0.3) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(125, 160, 202, 0.3) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(193, 232, 255, 0.2) 0px, transparent 50%),
+    radial-gradient(at 80% 100%, rgba(84, 131, 179, 0.2) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(125, 160, 202, 0.2) 0px, transparent 50%);
 }
+
+/* Everything below is custom CSS living outside Tailwind's own layers.
+   Unlayered CSS always wins over layered CSS (Tailwind's utilities live in
+   @layer utilities) regardless of specificity or source order — so without
+   this wrapper, base resets like `button { background: none }` permanently
+   blocked utility classes like `bg-white` from ever painting a button. */
+@layer base {
 
 * {
   box-sizing: border-box;
@@ -38,8 +52,29 @@ li {
 }
 
 html {
-  scroll-behavior: smooth;
+  /* No scroll-behavior:smooth here — GSAP ScrollSmoother drives scroll
+     easing itself, and the browser's native smooth-scroll fights it on
+     quick direction changes, causing the scroll to visibly stick/freeze. */
   overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Main app scrollbar hidden (scrolling still works via wheel/touch/keys) —
+   scoped to the document + ScrollSmoother's own scroll containers only, so
+   other scrollable UI (e.g. the chatbot message list) keeps a normal,
+   visible scrollbar. */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#smooth-wrapper::-webkit-scrollbar,
+#smooth-content::-webkit-scrollbar {
+  display: none;
+}
+
+#smooth-wrapper,
+#smooth-content {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 body {
@@ -56,24 +91,6 @@ body {
 ::selection {
   background: var(--color-primary);
   color: white;
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-bg);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
 }
 
 /* Noise Texture */
@@ -131,13 +148,6 @@ body {
   word-break: break-word;
 }
 
-.modern-card:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(99, 102, 241, 0.3);
-  /* transform: translateY(-4px); */
-  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.15);
-}
-
 /* Animations */
 @keyframes fade-in-up {
   from {
@@ -183,12 +193,12 @@ body {
 @keyframes glow {
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 20px rgba(84, 131, 179, 0.3);
   }
   50% {
     box-shadow:
-      0 0 40px rgba(99, 102, 241, 0.6),
-      0 0 60px rgba(139, 92, 246, 0.4);
+      0 0 40px rgba(84, 131, 179, 0.6),
+      0 0 60px rgba(125, 160, 202, 0.4);
   }
 }
 
@@ -205,10 +215,10 @@ body {
 @keyframes pulse-border {
   0%,
   100% {
-    border-color: rgba(99, 102, 241, 0.2);
+    border-color: rgba(84, 131, 179, 0.2);
   }
   50% {
-    border-color: rgba(139, 92, 246, 0.5);
+    border-color: rgba(125, 160, 202, 0.5);
   }
 }
 
@@ -240,6 +250,59 @@ body {
 
 .animate-pulse-border {
   animation: pulse-border 2s ease-in-out infinite;
+}
+
+/* Fluid typography: scales continuously with viewport width instead of
+   jumping between fixed breakpoint sizes, so text shrinks smoothly all the
+   way down to small phones. */
+/* Each pair below is solved so the preferred value hits the min exactly at a
+   320px (small-phone) viewport and the max exactly at the breakpoint the
+   old fixed size used to kick in at — so size actually ramps across that
+   whole range instead of undershooting and looking small on real screens. */
+.heading-fluid {
+  /* 28px at 320px -> 72px at 1024px */
+  font-size: clamp(1.75rem, 0.5rem + 6.25vw, 4.5rem);
+}
+
+.hero-heading-fluid {
+  /* 40px at 320px -> 144px at 1024px */
+  font-size: clamp(2.5rem, -0.5rem + 15vw, 9rem);
+}
+
+.card-title-fluid {
+  /* 15px at 320px -> 20px at 640px */
+  font-size: clamp(0.9375rem, 0.625rem + 1.5625vw, 1.25rem);
+}
+
+.card-text-fluid {
+  /* 11px at 320px -> 14px at 640px */
+  font-size: clamp(0.6875rem, 0.5rem + 0.9375vw, 0.875rem);
+}
+
+/* Scrolls normally, just hides the scrollbar chrome so content that doesn't
+   fit its box (e.g. the flipped About card) stays fully reachable without a
+   visible scrollbar track. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 22px 6px rgba(139, 92, 246, 0.45);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 2s ease-in-out infinite;
 }
 
 /* Text Gradient */
@@ -327,31 +390,43 @@ a {
   opacity: 1;
 }
 
-/* Spotlight Effect */
-.spotlight {
-  position: relative;
-  overflow: hidden;
+/* Marquee (tech stack ticker). The track renders --marquee-repeat copies of
+   the list back to back; translating by exactly one copy's width
+   (100% / --marquee-repeat) makes the loop seamless regardless of how many
+   copies are rendered. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% / var(--marquee-repeat, 2)));
+  }
 }
 
-.spotlight::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(99, 102, 241, 0.15) 0%,
-    transparent 70%
-  );
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  pointer-events: none;
+.marquee-track {
+  animation: marquee 16s linear infinite;
 }
 
-.spotlight:hover::before {
-  opacity: 1;
+/* Respect reduced motion: neutralize decorative CSS keyframe animations */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .animate-float,
+  .animate-glow,
+  .animate-gradient,
+  .animate-pulse-border,
+  .animate-breathe,
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .animate-slide-in-right,
+  .animate-slide-up,
+  .animate-slide-in-left,
+  .animate-glow-pulse,
+  .animate-shimmer,
+  .text-gradient,
+  .animate-pulse,
+  .animate-ping {
+    animation: none !important;
+  }
 }
 
 /* Bento Grid */
@@ -471,24 +546,6 @@ a {
   animation: shimmer 2s infinite;
 }
 
-/* Smooth scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: #0f0f0f;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #2563eb;
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #1d4ed8;
-}
-
 /* Glass morphism effect */
 .glass {
   background: rgba(255, 255, 255, 0.1);
@@ -514,7 +571,7 @@ a {
 
 /* Focus styles */
 :focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--color-steel);
   outline-offset: 2px;
 }
 
@@ -545,8 +602,10 @@ textarea {
 
 /* Code block styles */
 code {
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(84, 131, 179, 0.15);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: "Monaco", "Courier New", monospace;
 }
+
+} /* end @layer base */
