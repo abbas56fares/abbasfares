@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useGSAP } from "@gsap/react";
 import { gsap } from "../lib/gsap";
 
 interface FormData {
@@ -18,38 +17,7 @@ export default function Contact() {
   });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
-  const sectionRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const formCardRef = useRef<HTMLDivElement>(null);
   const submitBtnRef = useRef<HTMLButtonElement>(null);
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.set(headerRef.current, { opacity: 0, y: 24 });
-        gsap.to(headerRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: headerRef.current, start: "top 85%" },
-        });
-
-        gsap.set(formCardRef.current, { opacity: 0, y: 30, scale: 0.97 });
-        gsap.to(formCardRef.current, {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: { trigger: formCardRef.current, start: "top 85%" },
-        });
-      });
-    },
-    { scope: sectionRef },
-  );
 
   useEffect(() => {
     if (status === "success" && submitBtnRef.current) {
@@ -99,13 +67,13 @@ export default function Contact() {
   };
 
   return (
-    <section ref={sectionRef} id="contact" className="relative w-full py-32 px-6 overflow-hidden">
+    <section id="contact" className="relative w-full py-32 px-6 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-steel/10 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-ice/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
 
       <div className="relative max-w-5xl mx-auto">
-        <div ref={headerRef} className="text-center mb-16">
+        <div className="text-center mb-16">
           <h2 className="heading-fluid font-black mb-4">
             Get In <span className="text-gradient">Touch</span>
           </h2>
@@ -113,7 +81,7 @@ export default function Contact() {
         </div>
 
         <div className="grid">
-          <div ref={formCardRef} className="glass modern-card p-4 sm:p-8">
+          <div className="glass modern-card p-4 sm:p-8">
             {/* NETLIFY FORM CONFIGURATION */}
             <form
               name="contact"

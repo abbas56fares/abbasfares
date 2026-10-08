@@ -10,10 +10,10 @@ const experience = {
   company: "VioletPro",
   duration: "September 2025 – November 2025",
   points: [
-    "Developed Laravel backends and MySQL databases for digital menu systems with a Vue.js frontend, delivering fully functional applications that consistently met client requirements.",
-    "Deployed custom content management solutions and responsive web applications from scratch, ensuring smooth performance across devices, browsers, and screen sizes.",
-    "Enhanced backend logic and overall system performance through careful code review, resulting in faster response times and improved user experience.",
-    "Managed version control and codebase structuring using Git and GitHub, enabling smoother collaboration within the development team.",
+    "Developed Laravel backends and MySQL databases for digital menu systems with a Vue.js frontend, delivering fully functional applications that consistently met client requirements and specific business needs.",
+    "Deployed custom content management solutions and responsive web applications from scratch, ensuring smooth performance across different devices, browsers, and screen sizes.",
+    "Enhanced backend logic and overall system performance through careful code review, resulting in faster response times and significantly improved user experience.",
+    "Managed version control and codebase structuring using Git and GitHub, maintaining well-organized repositories, and enabling smoother collaboration within the development team.",
   ],
 };
 

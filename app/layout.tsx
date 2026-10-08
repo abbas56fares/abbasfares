@@ -15,18 +15,27 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Abbas Fares | Laravel Full-Stack Developer & AI Systems",
   description:
-    "Professional portfolio of Abbas Fares - Laravel full-stack developer specializing in PHP, Vue, React, Next.js, and AI-powered systems with RAG and AI agents.",
+    "Professional portfolio of Abbas Fares, a Laravel full-stack developer specializing in PHP, RESTful API development, backend architecture, and database design, with hands-on experience building AI-powered systems using RAG and AI agents.",
   keywords: [
     "Abbas Fares",
     "VILT Stack",
     "Web Developer",
-    "Full-Stack",
-    "Laravel",
-    "Frontend",
-    "Backend",
+    "Full-Stack Developer",
+    "Laravel Development",
+    "PHP",
+    "RESTful API Development",
+    "Backend Architecture",
+    "Frontend Development",
+    "Database Design",
+    "System Optimization",
+    "Object-Oriented Programming",
+    "Cloud Hosting",
     "React",
     "Next.js",
-    "AI",
+    "Vue.js",
+    "Artificial Intelligence",
+    "AI Agents",
+    "RAG",
     "ML",
   ],
   authors: [{ name: "Abbas Fares" }],
@@ -37,7 +46,7 @@ export const metadata: Metadata = {
     siteName: "Abbas Fares Portfolio",
     title: "Abbas Fares | Full-Stack Developer & AI",
     description:
-      "Professional portfolio showcasing web development and AI/ML projects",
+      "Laravel full-stack developer with core strengths in RESTful API development, backend architecture, and database design, building AI-powered systems with RAG and AI agents.",
   },
 };
 

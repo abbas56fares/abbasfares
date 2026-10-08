@@ -13,7 +13,25 @@ export const CV_DATA = {
   github: "https://github.com/abbas56fares/",
 
   profile:
-    "Laravel-focused Full-Stack Developer with hands-on experience building secure, API-driven web applications, AI-powered systems, and backend services for real business needs. Skilled in PHP, Laravel, Vue.js, JavaScript, Python, React, and Next.js, with practical experience in MySQL, REST APIs, Docker, AI agents, and cloud hosting.",
+    "Laravel-focused Full-Stack Developer with hands-on experience building secure, API-driven web applications, AI-powered systems, and backend services for real business needs. Skilled in PHP, Laravel, Vue.js, JavaScript, Python, React, and Next.js, with practical experience in MySQL, REST APIs, Docker, AI agents, and cloud hosting. Focused on building reliable, user-friendly applications that solve real problems and deliver clear, consistent value to users, clients, and teams. Strong object-oriented foundations (Java, C++, PHP/Laravel) and hands-on experience building AI features with RAG and AI agents.",
+
+  coreCompetencies: [
+    "Laravel Development",
+    "PHP",
+    "RESTful API Development",
+    "Third-Party API Integration",
+    "Web Development",
+    "Backend Architecture",
+    "Frontend Development",
+    "Database Design",
+    "System Optimization",
+    "Code Review",
+    "Debugging and Code Maintenance",
+    "Object-Oriented Programming",
+    "Artificial Intelligence",
+    "Cloud Hosting",
+    "Version Control",
+  ],
 
   education: {
     degree: "Bachelor of Science in Computer Science",
@@ -37,10 +55,10 @@ export const CV_DATA = {
     company: "VioletPro",
     duration: "September 2025 – November 2025",
     responsibilities: [
-      "Developed Laravel backends and MySQL databases for digital menu systems with a Vue.js frontend, delivering fully functional applications that consistently met client requirements",
-      "Deployed custom content management solutions and responsive web applications from scratch, ensuring smooth performance across devices, browsers, and screen sizes",
-      "Enhanced backend logic and overall system performance through careful code review, resulting in faster response times and improved user experience",
-      "Managed version control and codebase structuring using Git and GitHub, enabling smoother collaboration within the development team",
+      "Developed Laravel backends and MySQL databases for digital menu systems with a Vue.js frontend, delivering fully functional applications that consistently met client requirements and specific business needs",
+      "Deployed custom content management solutions and responsive web applications from scratch, ensuring smooth performance across different devices, browsers, and screen sizes",
+      "Enhanced backend logic and overall system performance through careful code review, resulting in faster response times and significantly improved user experience",
+      "Managed version control and codebase structuring using Git and GitHub, maintaining well-organized repositories, and enabling smoother collaboration within the development team",
       "Fixed defects and maintained existing code through code review",
     ],
   },
@@ -81,21 +99,21 @@ export const CV_DATA = {
     {
       name: "Full-Stack Delivery Management System",
       description:
-        "Senior project: a multi-role delivery platform with global admin oversight and branch-specific controls, real-time tracking via Maps API, and secure QR code / OTP delivery validation",
+        "Senior project: architected a multi-role delivery platform with role-based access, featuring global admin oversight and branch-specific controls. Integrated real-time tracking through Maps API and implemented secure delivery validation using QR codes and one-time passwords for reliable and accurate order confirmation",
       tech: ["Laravel", "PHP", "MySQL", "JavaScript", "Maps API", "REST APIs"],
       date: "January 2026",
     },
     {
       name: "AI-Powered Task Management System",
       description:
-        "Full-stack task management platform combining cloud-based AI agents with Retrieval-Augmented Generation (RAG) to support smarter daily planning and automated recommendations",
+        "Built a full-stack task management platform combining cloud-based AI agents with Retrieval-Augmented Generation (RAG) to support smarter daily planning and decision-making through intelligent task assistance and automated recommendations",
       tech: ["Next.js", "Laravel", "FastAPI", "Python", "PostgreSQL", "ChromaDB", "Ollama", "RAG", "AI Agents"],
       date: "May 2026",
     },
     {
       name: "HabitFlow",
       description:
-        "A comprehensive habit-tracking application with a relational MySQL schema for managing user data and progress logs over time",
+        "Built a comprehensive habit-tracking tool to track and support users' daily habits consistency, with a relational database schema in MySQL to manage user data and track progress logs over an extended time",
       tech: ["React", "Node.js", "Express", "MySQL"],
       date: "November 2025",
       demo: "https://ezhabitflow.netlify.app/",
@@ -119,7 +137,7 @@ export const CV_DATA = {
     {
       name: "AI Chatbot",
       description:
-        "A functional chatbot built with Python and the NLTK library for natural language processing and conversational logic",
+        "Developed a functional chatbot using Python and the NLTK library for natural language processing, focused on accurately interpreting user input, generating relevant contextual responses, and applying core techniques for conversational logic and text handling",
       tech: ["Python", "NLTK"],
       date: "May 2024",
     },
@@ -264,6 +282,19 @@ function getResponse(userMessage: string): string {
     return response;
   }
 
+  // Core competencies
+  if (
+    tokens.some((w) =>
+      ["competency", "competencies", "competence", "strengths", "expertise", "core"].includes(w),
+    )
+  ) {
+    let response = "🎯 Core Competencies:\n\n";
+    CV_DATA.coreCompetencies.forEach((item) => {
+      response += `• ${item}\n`;
+    });
+    return response;
+  }
+
   // Soft skills
   if (
     tokens.some((w) =>
@@ -353,7 +384,7 @@ function getResponse(userMessage: string): string {
 
   // Help
   if (tokens.some((w) => ["help", "can", "what"].includes(w))) {
-    return "I can provide information about Abbas Fares including:\n• Contact details (email, phone, location, LinkedIn, GitHub)\n• Profile summary\n• Education background\n• Certifications (Cisco CCNA)\n• Work experience & internships\n• Technical & soft skills\n• Programming languages (PHP, Java, Python, C++, JavaScript)\n• Projects portfolio\n• Spoken languages\n\nJust ask me anything!";
+    return "I can provide information about Abbas Fares including:\n• Contact details (email, phone, location, LinkedIn, GitHub)\n• Profile summary\n• Core competencies\n• Education background\n• Certifications (Cisco CCNA)\n• Work experience & internships\n• Technical & soft skills\n• Programming languages (PHP, Java, Python, C++, JavaScript)\n• Projects portfolio\n• Spoken languages\n\nJust ask me anything!";
   }
 
   // Default

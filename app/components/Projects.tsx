@@ -30,7 +30,7 @@ const projects: Project[] = [
   {
     title: "Full-Stack Delivery Management System",
     description:
-      "Senior project: a multi-role delivery platform with global admin oversight and branch-specific controls. Integrates real-time tracking via Maps API and secure QR code / OTP validation for reliable order confirmation.",
+      "Senior project: architected a multi-role delivery platform with role-based access, global admin oversight, and branch-specific controls. Integrates real-time tracking via Maps API and secure QR code / OTP validation for reliable order confirmation.",
     tech: [
       "Laravel + Blades",
       "PHP",
@@ -50,7 +50,7 @@ const projects: Project[] = [
   {
     title: "AI-Powered Task Management System",
     description:
-      "A full-stack task management platform combining AI agents with Retrieval-Augmented Generation (RAG) for smarter daily planning and automated recommendations.",
+      "A full-stack task management platform combining AI agents with Retrieval-Augmented Generation (RAG) for smarter daily planning, decision-making, and automated recommendations.",
     tech: [
       "Next.js",
       "Laravel",
