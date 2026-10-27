@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@tsparticles/engine": "^4.5.0",
+    "@tsparticles/react": "^4.5.0",
+    "@tsparticles/slim": "^4.5.0",
     "gsap": "^3.14.2",
     "next": "16.1.6",
     "react": "19.2.3",

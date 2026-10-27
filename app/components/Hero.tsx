@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "../lib/gsap";
+import ParticleBackground from "./ParticleBackground";
 
 const ROLES = ["Laravel Full-Stack Developer", "PHP | REST APIs | Vue.js"];
 const TECH_STACK = [
@@ -106,6 +107,9 @@ export default function Hero() {
       id="home"
       className="relative min-h-screen w-full flex flex-col items-center justify-center px-4 pt-20 overflow-hidden"
     >
+      {/* Interactive particle constellation (sits behind everything in this section) */}
+      <ParticleBackground />
+
       {/* Floating gradient orbs with parallax (outer = GSAP parallax, inner = CSS float, so the two transforms don't fight on one element) */}
       <div
         ref={orb1Ref}
