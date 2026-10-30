@@ -63,29 +63,18 @@ li {
 }
 
 html {
-  /* No scroll-behavior:smooth here — GSAP ScrollSmoother drives scroll
-     easing itself, and the browser's native smooth-scroll fights it on
-     quick direction changes, causing the scroll to visibly stick/freeze. */
+  /* Plain native scroll — no scroll-behavior:smooth, no JS smoothing. */
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
 /* Main app scrollbar hidden (scrolling still works via wheel/touch/keys) —
-   scoped to the document + ScrollSmoother's own scroll containers only, so
-   other scrollable UI (e.g. the chatbot message list) keeps a normal,
-   visible scrollbar. */
+   scoped to the document only, so other scrollable UI (e.g. the chatbot
+   message list) keeps a normal, visible scrollbar. */
 html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-#smooth-wrapper::-webkit-scrollbar,
-#smooth-content::-webkit-scrollbar {
+body::-webkit-scrollbar {
   display: none;
-}
-
-#smooth-wrapper,
-#smooth-content {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
 body {
@@ -117,11 +106,15 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* Glass Effect */
+/* Glass Effect.
+   No `backdrop-filter` here on purpose: every `.glass` element except the
+   NavBar sits over the flat near-black page background, so the blur had no
+   visible effect while forcing the compositor to re-blur its backdrop on
+   every scroll frame — measured as the single biggest source of scroll jank
+   on a 2560x1440 display. The NavBar keeps its own inline backdrop-filter
+   (it overlaps the animated hero canvas, where the blur is actually visible). */
 .glass {
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
@@ -145,7 +138,7 @@ body {
 /* Modern Card */
 .modern-card {
   background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(10px);
+  /* backdrop-filter removed — see the note on `.glass` above. */
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 24px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);

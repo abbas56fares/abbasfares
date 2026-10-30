@@ -16,8 +16,8 @@ const initEngine = async (engine: Engine): Promise<void> => {
 const ACCENT = "#6366f1";
 
 // Generated into /public/skill-icons by hand from the same react-icons set
-// Skills.tsx uses (see CLAUDE.md). Each file is a 64px SVG with a literal fill
-// colour, tuned to stay legible against the navy hero background.
+// Skills.tsx uses (see CLAUDE.md), each with a literal fill colour tuned to
+// stay legible against the navy hero background.
 const SKILL_ICONS = [
   "react",
   "nextjs",
@@ -40,19 +40,26 @@ const SKILL_ICONS = [
   "cloud",
 ];
 
+// PNG, not SVG, on purpose: tsParticles `drawImage`s every particle every
+// frame, and Chrome re-rasterizes an SVG source at the destination size on
+// each call. With 108 particles that showed up as a ~500ms main-thread freeze
+// every time the hero scrolled back into view (e.g. clicking "Home" in the
+// nav from any other section). A decoded PNG bitmap costs nothing to blit —
+// same measurement dropped to ~10ms. The .png files are rasterized from the
+// .svg siblings at 2x (128px); regenerate both if an icon changes.
 const SKILL_IMAGES = SKILL_ICONS.map((name) => ({
-  src: `/skill-icons/${name}.svg`,
-  width: 64,
-  height: 64,
+  src: `/skill-icons/${name}.png`,
+  width: 128,
+  height: 128,
 }));
 
 /**
  * Interactive constellation canvas for the Hero section.
  *
  * Scoped to its parent (not `fullScreen`) on purpose: a full-screen canvas is
- * `position: fixed`, which breaks inside `#smooth-content` because ScrollSmoother
- * transforms that element — and it would also sit behind `<main>`'s opaque
- * background. The parent must be `position: relative` (Hero's `<section>` is).
+ * `position: fixed`, so it would sit behind `<main>`'s opaque background and
+ * stay pinned while the page scrolls. The parent must be `position: relative`
+ * (Hero's `<section>` is).
  */
 function ParticleBackground() {
   const isPhone = useIsMobile(768);
