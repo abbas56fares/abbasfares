@@ -28,13 +28,6 @@
   --color-text: #ffffff;
   --color-text-muted: #a1a1aa;
 
-  /* Gradients */
-  --gradient-mesh:
-    radial-gradient(at 40% 20%, rgba(84, 131, 179, 0.3) 0px, transparent 50%),
-    radial-gradient(at 80% 0%, rgba(125, 160, 202, 0.3) 0px, transparent 50%),
-    radial-gradient(at 0% 50%, rgba(193, 232, 255, 0.2) 0px, transparent 50%),
-    radial-gradient(at 80% 100%, rgba(84, 131, 179, 0.2) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(125, 160, 202, 0.2) 0px, transparent 50%);
 }
 
 /* Everything below is custom CSS living outside Tailwind's own layers.
@@ -43,374 +36,269 @@
    this wrapper, base resets like `button { background: none }` permanently
    blocked utility classes like `bg-white` from ever painting a button. */
 @layer base {
-
-* {
-  box-sizing: border-box;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-ul,
-ol,
-li {
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  /* No scroll-behavior:smooth here — GSAP ScrollSmoother drives scroll
-     easing itself, and the browser's native smooth-scroll fights it on
-     quick direction changes, causing the scroll to visibly stick/freeze. */
-  overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-/* Main app scrollbar hidden (scrolling still works via wheel/touch/keys) —
-   scoped to the document + ScrollSmoother's own scroll containers only, so
-   other scrollable UI (e.g. the chatbot message list) keeps a normal,
-   visible scrollbar. */
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-#smooth-wrapper::-webkit-scrollbar,
-#smooth-content::-webkit-scrollbar {
-  display: none;
-}
-
-#smooth-wrapper,
-#smooth-content {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-}
-
-::selection {
-  background: var(--color-primary);
-  color: white;
-}
-
-/* Noise Texture */
-.noise {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0.03;
-  z-index: 100;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-/* Glass Effect */
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
-
-/* Gradient Mesh Background */
-.gradient-mesh {
-  background: var(--gradient-mesh);
-  animation: mesh-animation 20s ease infinite;
-}
-
-@keyframes mesh-animation {
-  0%,
-  100% {
-    opacity: 1;
+  * {
+    box-sizing: border-box;
   }
-  50% {
-    opacity: 0.8;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  ul,
+  ol,
+  li {
+    margin: 0;
+    padding: 0;
   }
-}
 
-/* Modern Card */
-.modern-card {
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 24px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.modern-card * {
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-
-/* Animations */
-@keyframes fade-in {
-  from {
-    opacity: 0;
+  html {
+    /* ScrollSmoother used to drive scroll easing itself and fought the
+       browser's native smooth-scroll. With it gone, native smooth scrolling
+       handles #section anchor jumps with zero JS and zero main-thread cost.
+       ScrollTrigger only reads the scroll position here (no pinning, no
+       scrub), so it stays in sync with a native smooth scroll. */
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  to {
-    opacity: 1;
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
-}
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
+  /* Main app scrollbar hidden (scrolling still works via wheel/touch/keys) —
+   scoped to the document only, so other scrollable UI (e.g. the chatbot
+   message list) keeps a normal, visible scrollbar. */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
   }
-  50% {
-    transform: translateY(-20px);
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
-}
 
-@keyframes glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(84, 131, 179, 0.3);
+  ::selection {
+    background: var(--color-primary);
+    color: white;
   }
-  50% {
-    box-shadow:
-      0 0 40px rgba(84, 131, 179, 0.6),
-      0 0 60px rgba(125, 160, 202, 0.4);
+
+  /* Noise Texture */
+  /* .noise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 100;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  } */
+
+  /* REPLACE THE UNIVERSAL * TRANSITION WITH THIS REFINED TARGETED RULE */
+  a,
+  button,
+  input,
+  textarea,
+  .modern-card,
+  .project-card,
+  .skill-card {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
-}
 
-@keyframes gradient-shift {
-  0%,
-  100% {
-    background-position: 0% 50%;
+  /* Glass effect — flat translucent fill, no backdrop-filter.
+     backdrop-filter made the compositor snapshot and blur the backdrop behind
+     every instance and re-run that filter whenever anything behind it moved,
+     i.e. on every scroll frame. This class is on nearly every card, so that
+     was a permanent GPU tax for a barely visible effect over a #0a0a0f ground.
+     The large 32px-blur shadow was also expensive to paint at that count. */
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
-  50% {
-    background-position: 100% 50%;
+
+  /* Modern Card */
+  .modern-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 24px;
+    /* Only the two properties that actually change on hover. `transition: all`
+       fired transitionrun/start/end on every animatable property of every card
+       on each state change (349 transition events in the profiled scroll). */
+    transition:
+      border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
-}
 
-@keyframes pulse-border {
-  0%,
-  100% {
-    border-color: rgba(84, 131, 179, 0.2);
+  .modern-card * {
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
-  50% {
-    border-color: rgba(125, 160, 202, 0.5);
+
+  /* Animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
-}
 
-/* Utility Classes */
-.animate-fade-in {
-  animation: fade-in 1s ease-out;
-}
+  /* Utility Classes */
+  .animate-fade-in {
+    animation: fade-in 1s ease-out;
+  }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 3s ease-in-out infinite;
-}
-
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient-shift 6s ease infinite;
-}
-
-.animate-pulse-border {
-  animation: pulse-border 2s ease-in-out infinite;
-}
-
-/* Fluid typography: scales continuously with viewport width instead of
+  /* Fluid typography: scales continuously with viewport width instead of
    jumping between fixed breakpoint sizes, so text shrinks smoothly all the
    way down to small phones. */
-/* Each pair below is solved so the preferred value hits the min exactly at a
+  /* Each pair below is solved so the preferred value hits the min exactly at a
    320px (small-phone) viewport and the max exactly at the breakpoint the
    old fixed size used to kick in at — so size actually ramps across that
    whole range instead of undershooting and looking small on real screens. */
-.heading-fluid {
-  /* 28px at 320px -> 72px at 1024px */
-  font-size: clamp(1.75rem, 0.5rem + 6.25vw, 4.5rem);
-}
+  .heading-fluid {
+    /* 28px at 320px -> 72px at 1024px */
+    font-size: clamp(1.75rem, 0.5rem + 6.25vw, 4.5rem);
+  }
 
-.hero-heading-fluid {
-  /* 40px at 320px -> 144px at 1024px */
-  font-size: clamp(2.5rem, -0.5rem + 15vw, 9rem);
-}
+  .hero-heading-fluid {
+    /* 40px at 320px -> 144px at 1024px */
+    font-size: clamp(2.5rem, -0.5rem + 15vw, 9rem);
+  }
 
-.card-title-fluid {
-  /* 15px at 320px -> 20px at 640px */
-  font-size: clamp(0.9375rem, 0.625rem + 1.5625vw, 1.25rem);
-}
+  .card-title-fluid {
+    /* 15px at 320px -> 20px at 640px */
+    font-size: clamp(0.9375rem, 0.625rem + 1.5625vw, 1.25rem);
+  }
 
-.card-text-fluid {
-  /* 11px at 320px -> 14px at 640px */
-  font-size: clamp(0.6875rem, 0.5rem + 0.9375vw, 0.875rem);
-}
+  .card-text-fluid {
+    /* 11px at 320px -> 14px at 640px */
+    font-size: clamp(0.6875rem, 0.5rem + 0.9375vw, 0.875rem);
+  }
 
-/* Scrolls normally, just hides the scrollbar chrome so content that doesn't
+  /* Scrolls normally, just hides the scrollbar chrome so content that doesn't
    fit its box (e.g. the flipped About card) stays fully reachable without a
    visible scrollbar track. */
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-@keyframes breathe {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.5);
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  50% {
-    box-shadow: 0 0 22px 6px rgba(139, 92, 246, 0.45);
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
-}
 
-.animate-breathe {
-  animation: breathe 2s ease-in-out infinite;
-}
-
-/* Text Gradient */
-.text-gradient {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  background-size: 200% 200%;
-  animation: gradient-shift 6s ease infinite;
-}
-
-/* Smooth Transitions */
-* {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Focus Styles */
-:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 4px;
-  border-radius: 8px;
-}
-
-/* Button Reset */
-button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Link and button text centering */
-a,
-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-/* Input Styles */
-input,
-textarea {
-  font-family: inherit;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-/* Link Styles */
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* Gradient Border Effect */
-.gradient-border {
-  position: relative;
-  background: var(--color-surface);
-  border-radius: 20px;
-}
-
-.gradient-border::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  padding: 2px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  opacity: 0.6;
-}
-
-.gradient-border:hover::before {
-  opacity: 1;
-}
-
-/* Marquee (tech stack ticker). The track renders --marquee-repeat copies of
-   the list back to back; translating by exactly one copy's width
-   (100% / --marquee-repeat) makes the loop seamless regardless of how many
-   copies are rendered. */
-@keyframes marquee {
-  from {
-    transform: translateX(0);
+  /* Text Gradient */
+  .text-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  to {
-    transform: translateX(calc(-100% / var(--marquee-repeat, 2)));
+
+  /* Focus Styles */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 4px;
+    border-radius: 8px;
   }
-}
 
-.marquee-track {
-  animation: marquee 16s linear infinite;
-}
-
-/* Respect reduced motion: neutralize decorative CSS keyframe animations */
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track,
-  .animate-float,
-  .animate-glow,
-  .animate-gradient,
-  .animate-pulse-border,
-  .animate-breathe,
-  .animate-fade-in,
-  .animate-glow-pulse,
-  .animate-shimmer,
-  .text-gradient,
-  .animate-pulse,
-  .animate-ping {
-    animation: none !important;
+  /* Button Reset */
+  button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-}
 
-/* Bento Grid */
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
+  /* Link and button text centering */
+  a,
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Input Styles */
+  input,
+  textarea {
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Link Styles */
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Gradient Border Effect */
+  /* One-shot page-swap fade for the Skills/Projects carousels. Keyed remount
+     plays it once; nothing animates while idle. */
+  @keyframes page-swap {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .page-swap {
+    animation: page-swap 0.22s ease-out;
+  }
+
+  /* Mobile nav drawer entrance (user-triggered, one-shot). */
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .panel-in {
+    animation: panel-in 0.25s ease-out;
+  }
+
+  /* Respect reduced motion: neutralize the remaining one-shot/transient
+     animations. Every infinite/decorative animation has been removed. */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-bounce,
+    .page-swap,
+    .panel-in {
+      animation: none !important;
+    }
+
+  }
 
 } /* end @layer base */

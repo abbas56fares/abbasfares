@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "../lib/gsap";
+import { useState } from "react";
 
 interface FormData {
   name: string;
@@ -17,17 +16,6 @@ export default function Contact() {
   });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
-  const submitBtnRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (status === "success" && submitBtnRef.current) {
-      gsap.fromTo(
-        submitBtnRef.current,
-        { scale: 1 },
-        { scale: 1.06, duration: 0.2, ease: "power2.out", yoyo: true, repeat: 1 },
-      );
-    }
-  }, [status]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -69,8 +57,8 @@ export default function Contact() {
   return (
     <section id="contact" className="relative w-full py-32 px-6 overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-steel/10 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-ice/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+      <div className="absolute top-1/3 left-1/3 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(84,131,179,0.10),transparent_70%)]" />
+      <div className="absolute bottom-1/3 right-1/3 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(193,232,255,0.10),transparent_70%)]" />
 
       <div className="relative max-w-5xl mx-auto">
         <div className="text-center mb-16">
@@ -140,8 +128,7 @@ export default function Contact() {
               </div>
 
               <button
-                ref={submitBtnRef}
-                type="submit"
+                    type="submit"
                 disabled={status === "sending"}
                 className="w-full glass py-2.5 px-4 sm:py-4 sm:px-6 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl text-white font-bold text-sm sm:text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >

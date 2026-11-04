@@ -1,6 +1,5 @@
 "use client";
 
-import { useGSAP } from "@gsap/react";
 import { JSX, useMemo, useRef, useState } from "react";
 import {
   FaCalendarAlt,
@@ -12,7 +11,6 @@ import {
   FaTruck,
 } from "react-icons/fa";
 import { useIsMobile } from "../hooks/useIsMobile";
-import { gsap } from "../lib/gsap";
 
 interface Project {
   title: string;
@@ -161,12 +159,20 @@ function ProjectImage({ src, alt }: { src: string; alt: string }) {
 
 function ProjectCard({ project }: { project: Project }) {
   const [flipped, setFlipped] = useState(false);
+  // True only while the flip transition runs; gates will-change.
+  const [flipping, setFlipping] = useState(false);
 
   return (
     <div className="relative h-full" style={{ perspective: "1500px" }}>
       <div
         className="relative h-full transition-transform duration-700 motion-reduce:transition-none transform-3d"
-        style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+        style={{
+          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+          // Promote to its own compositor layer only while the flip is running
+          // (see the same note in About.tsx) instead of for the page's life.
+          willChange: flipping ? "transform" : undefined,
+        }}
+        onTransitionEnd={() => setFlipping(false)}
       >
         {/* Front Face */}
         {/* No fixed height on mobile: content (esp. the description) must be
@@ -176,9 +182,12 @@ function ProjectCard({ project }: { project: Project }) {
         <div className="project-card glass modern-card p-4 lg:p-6 flex flex-col lg:h-full backface-hidden [-webkit-backface-visibility:hidden]">
           <button
             type="button"
-            onClick={() => setFlipped(true)}
+            onClick={() => {
+              setFlipping(true);
+              setFlipped(true);
+            }}
             aria-label={`View screenshots of ${project.title}`}
-            className={`relative w-9 h-9 lg:w-12 lg:h-12 rounded-lg lg:rounded-2xl bg-linear-to-br ${project.gradient} flex items-center justify-center text-lg lg:text-2xl mb-2 lg:mb-4 shadow-lg shrink-0 animate-breathe`}
+            className={`relative z-0 w-9 h-9 lg:w-12 lg:h-12 rounded-lg lg:rounded-2xl bg-linear-to-br ${project.gradient} flex items-center justify-center text-lg lg:text-2xl mb-2 lg:mb-4 shadow-lg shrink-0`}
           >
             {project.icon}
             <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white text-gray-900 flex items-center justify-center text-[8px] shadow-md">
@@ -239,7 +248,10 @@ function ProjectCard({ project }: { project: Project }) {
             </h3>
             <button
               type="button"
-              onClick={() => setFlipped(false)}
+              onClick={() => {
+                setFlipping(true);
+                setFlipped(false);
+              }}
               className="shrink-0 px-2 py-1 lg:px-3 lg:py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] lg:text-xs text-gray-300 font-medium"
             >
               Back
@@ -264,10 +276,7 @@ function ProjectCard({ project }: { project: Project }) {
 export default function Projects() {
   const containerRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
-  const reducedRef = useRef(false);
-  const isAnimatingRef = useRef(false);
   // 1024 = Tailwind's `lg` breakpoint (our "Wide" category's lower bound) —
   // must match the `lg:grid-cols-3` below so the JS page-chunking and the
   // CSS column count switch at the same breakpoint.
@@ -284,51 +293,12 @@ export default function Projects() {
   const pageCount = pages.length;
   const activePage = Math.min(page, pageCount - 1);
 
-  // No entrance animation — header/track render fully visible immediately.
-  // reducedRef is still needed by goTo()'s pagination-slide transition below.
-  useGSAP(
-    () => {
-      reducedRef.current = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-    },
-    { scope: containerRef },
-  );
-
+  // Page swap is a keyed remount plus a one-shot CSS fade (see .page-swap),
+  // not a GSAP tween — a live tween or ScrollTrigger keeps GSAP's ticker
+  // requesting animation frames for the life of the page (idle drain).
   const goTo = (next: number) => {
-    if (isAnimatingRef.current) return;
     const clamped = (next + pageCount) % pageCount;
-    if (clamped === page) return;
-    const dir = next < page ? -1 : 1;
-
-    if (reducedRef.current || !trackRef.current) {
-      setPage(clamped);
-      return;
-    }
-
-    isAnimatingRef.current = true;
-    gsap.to(trackRef.current, {
-      opacity: 0,
-      x: -dir * 40,
-      duration: 0.25,
-      ease: "power2.in",
-      onComplete: () => {
-        setPage(clamped);
-        gsap.fromTo(
-          trackRef.current,
-          { opacity: 0, x: dir * 40 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.35,
-            ease: "power2.out",
-            onComplete: () => {
-              isAnimatingRef.current = false;
-            },
-          },
-        );
-      },
-    });
+    if (clamped !== page) setPage(clamped);
   };
 
   // Swipe left/right to navigate pages (touch-action: pan-y lets vertical
@@ -356,8 +326,8 @@ export default function Projects() {
       className="relative w-full py-32 px-6 md:px-8 overflow-hidden"
     >
       {/* Background Effects */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-steel/5 rounded-full blur-3xl" />
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-sky/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 rounded-full bg-[radial-gradient(circle,rgba(84,131,179,0.06),transparent_70%)]" />
+      <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(125,160,202,0.10),transparent_70%)]" />
 
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
@@ -373,11 +343,11 @@ export default function Projects() {
 
         {/* Paginated Projects Carousel */}
         <div
-          ref={trackRef}
+          key={activePage}
           onPointerDown={onSwipeStart}
           onPointerUp={onSwipeEnd}
           onPointerCancel={() => (swipeRef.current.active = false)}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-2 touch-pan-y"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-2 touch-pan-y page-swap"
         >
           {pages[activePage].map((project) => (
             <ProjectCard key={project.title} project={project} />

@@ -8,7 +8,7 @@ import {
   FaMapMarkerAlt,
   FaRobot,
 } from "react-icons/fa";
-import { CV_DATA } from "./ChatBot";
+// import { CV_DATA } from "./ChatBot";
 
 const QUICK_FACTS = [
   { icon: <FaMapMarkerAlt />, label: "Location", value: "Beirut, Lebanon" },
@@ -32,7 +32,8 @@ export default function About() {
   const bioRef = useRef<HTMLDivElement>(null);
   const factsRef = useRef<HTMLDivElement>(null);
   const [flipped, setFlipped] = useState(false);
-
+  // True only while the flip transition runs; gates will-change.
+  const [flipping, setFlipping] = useState(false);
 
   return (
     <section
@@ -40,7 +41,7 @@ export default function About() {
       id="about"
       className="relative w-full py-32 px-4 overflow-hidden"
     >
-      <div className="absolute top-1/3 -left-20 w-96 h-96 bg-steel/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute top-1/3 -left-20 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(84,131,179,0.10),transparent_70%)]" />
 
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
@@ -57,10 +58,11 @@ export default function About() {
           {/* Flip Card */}
           <div className="relative" style={{ perspective: "2000px" }}>
             <button
-              onClick={() => setFlipped((f) => !f)}
-              className={`absolute top-3 right-3 sm:top-6 sm:right-6 z-20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-linear-to-r from-indigo-500 to-purple-500 text-white text-[10px] sm:text-xs md:text-sm font-bold shadow-lg ${
-                flipped ? "" : "animate-breathe"
-              }`}
+              onClick={() => {
+                setFlipping(true);
+                setFlipped((f) => !f);
+              }}
+              className="absolute top-3 right-3 sm:top-6 sm:right-6 z-20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-linear-to-r from-indigo-500 to-purple-500 text-white text-[10px] sm:text-xs md:text-sm font-bold shadow-lg"
             >
               {flipped ? "Back" : "Read More"}
             </button>
@@ -69,7 +71,13 @@ export default function About() {
               className="relative transition-transform duration-700 motion-reduce:transition-none transform-3d"
               style={{
                 transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+                // Layer-promotion hints used to sit here unconditionally,
+                // which pins a compositor layer for the page's whole life and
+                // makes the compositor re-assign it every frame (Layerize was
+                // 374.9ms self time). Promote only while the flip runs.
+                willChange: flipping ? "transform" : undefined,
               }}
+              onTransitionEnd={() => setFlipping(false)}
             >
               {/* Front Face: Bio Card */}
               <div className="modern-card pt-14 px-5 pb-6 sm:p-10 lg:p-12 backface-hidden [-webkit-backface-visibility:hidden]">
@@ -80,10 +88,10 @@ export default function About() {
                     style={{ perspective: "1000px" }}
                   >
                     <div ref={photoRef} className="relative">
-                      <div className="absolute -inset-1.5 rounded-[1.75rem] bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 opacity-70 blur-sm" />
+                      <div className="absolute -inset-1.5 rounded-[1.75rem] bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 opacity-70" />
                       <div className="relative h-44 w-44 overflow-hidden rounded-3xl sm:h-56 sm:w-56 lg:h-72 lg:w-72 ring-2 ring-white/10">
                         <Image
-                          src="/images/pic.jpg"
+                          src="/images/me.png"
                           alt="Abbas Fares"
                           fill
                           className="object-cover"
@@ -97,7 +105,7 @@ export default function About() {
                   <div ref={bioRef}>
                     <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/3 px-3.5 py-1.5 text-xs font-semibold text-white">
                       <span className="relative inline-flex w-2 h-2">
-                        <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping" />
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-40" />
                         <span className="relative inline-flex w-2 h-2 rounded-full bg-green-400" />
                       </span>
                       Available for opportunities
@@ -150,18 +158,18 @@ export default function About() {
                 <div className="space-y-2.5 sm:space-y-5 text-left">
                   <div>
                     <h3 className="text-lg sm:text-3xl font-bold text-white">
-                      {CV_DATA.name}
+                      {/* {CV_DATA.name} */}
                     </h3>
                     <p className="text-indigo-400 text-[11px] sm:text-sm font-semibold mt-0.5 sm:mt-1">
                       Laravel Full-Stack Developer
                     </p>
                     <p className="text-gray-500 text-[10px] sm:text-xs mt-1 sm:mt-2">
-                      {CV_DATA.email} · {CV_DATA.phone} · {CV_DATA.address}
+                      {/* {CV_DATA.email} · {CV_DATA.phone} · {CV_DATA.address} */}
                     </p>
                   </div>
 
                   <p className="text-gray-400 text-[11px] sm:text-sm leading-snug sm:leading-relaxed">
-                    {CV_DATA.profile}
+                    {/* {CV_DATA.profile} */}
                   </p>
 
                   <div>
@@ -169,12 +177,12 @@ export default function About() {
                       Experience
                     </h4>
                     <p className="text-white text-[11px] sm:text-sm font-semibold">
-                      {CV_DATA.experience.title} · {CV_DATA.experience.company}
+                      {/* {CV_DATA.experience.title} · {CV_DATA.experience.company} */}
                     </p>
                     <p className="text-gray-500 text-[10px] sm:text-xs mb-1 sm:mb-2">
-                      {CV_DATA.experience.duration}
+                      {/* {CV_DATA.experience.duration} */}
                     </p>
-                    <ul className="space-y-0.5 sm:space-y-1">
+                    {/* <ul className="space-y-0.5 sm:space-y-1">
                       {CV_DATA.experience.responsibilities.map((r) => (
                         <li
                           key={r}
@@ -184,7 +192,7 @@ export default function About() {
                           <span>{r}</span>
                         </li>
                       ))}
-                    </ul>
+                    </ul> */}
                   </div>
 
                   <div>
@@ -192,11 +200,11 @@ export default function About() {
                       Education
                     </h4>
                     <p className="text-white text-[11px] sm:text-sm font-semibold">
-                      {CV_DATA.education.degree}
+                      {/* {CV_DATA.education.degree} */}
                     </p>
                     <p className="text-gray-500 text-[10px] sm:text-xs">
-                      {CV_DATA.education.institution} ·{" "}
-                      {CV_DATA.education.duration}
+                      {/* {CV_DATA.education.institution} ·{" "}
+                      {CV_DATA.education.duration} */}
                     </p>
                   </div>
 
@@ -204,13 +212,16 @@ export default function About() {
                     <h4 className="text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">
                       Certifications
                     </h4>
-                    <ul className="space-y-0.5 sm:space-y-1">
+                    {/* <ul className="space-y-0.5 sm:space-y-1">
                       {CV_DATA.certifications.map((c) => (
-                        <li key={c} className="text-gray-400 text-[10px] sm:text-xs">
+                        <li
+                          key={c}
+                          className="text-gray-400 text-[10px] sm:text-xs"
+                        >
                           {c}
                         </li>
                       ))}
-                    </ul>
+                    </ul> */}
                   </div>
 
                   <div>
@@ -221,32 +232,32 @@ export default function About() {
                       <span className="text-gray-300 font-semibold">
                         Programming:{" "}
                       </span>
-                      {CV_DATA.skills.programming.join(", ")}
+                      {/* {CV_DATA.skills.programming.join(", ")} */}
                       <br />
                       <span className="text-gray-300 font-semibold">
                         Frontend:{" "}
                       </span>
-                      {CV_DATA.skills.frontend.join(", ")}
+                      {/* {CV_DATA.skills.frontend.join(", ")} */}
                       <br />
                       <span className="text-gray-300 font-semibold">
                         Backend:{" "}
                       </span>
-                      {CV_DATA.skills.backend.join(", ")}
+                      {/* {CV_DATA.skills.backend.join(", ")} */}
                       <br />
                       <span className="text-gray-300 font-semibold">
                         Databases:{" "}
                       </span>
-                      {CV_DATA.skills.database.join(", ")}
+                      {/* {CV_DATA.skills.database.join(", ")} */}
                       <br />
                       <span className="text-gray-300 font-semibold">
                         AI & ML:{" "}
                       </span>
-                      {CV_DATA.skills.ai.join(", ")}
+                      {/* {CV_DATA.skills.ai.join(", ")} */}
                       <br />
                       <span className="text-gray-300 font-semibold">
                         Tools:{" "}
                       </span>
-                      {CV_DATA.skills.tools.join(", ")}
+                      {/* {CV_DATA.skills.tools.join(", ")} */}
                     </p>
                   </div>
 
@@ -255,9 +266,9 @@ export default function About() {
                       Languages
                     </h4>
                     <p className="text-gray-400 text-[10px] sm:text-xs">
-                      {Object.entries(CV_DATA.languages)
+                      {/* {Object.entries(CV_DATA.languages)
                         .map(([lang, level]) => `${lang} (${level})`)
-                        .join(" · ")}
+                        .join(" · ")} */}
                     </p>
                   </div>
                 </div>

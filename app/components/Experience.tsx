@@ -38,7 +38,7 @@ export default function Experience() {
       id="experience"
       className="relative w-full py-32 px-4 overflow-hidden"
     >
-      <div className="absolute top-1/4 -right-20 w-96 h-96 bg-steel/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute top-1/4 -right-20 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(84,131,179,0.10),transparent_70%)]" />
 
       <div className="relative max-w-5xl mx-auto">
         <div ref={headerRef} className="text-center mb-16">

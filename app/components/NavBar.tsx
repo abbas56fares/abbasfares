@@ -1,7 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap, ScrollTrigger } from "../lib/gsap";
+import { useEffect, useState } from "react";
 
 const NAV_LINKS = [
   { href: "#home", label: "Home" },
@@ -15,56 +13,68 @@ const NAV_LINKS = [
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeHref, setActiveHref] = useState("#home");
-  const navRef = useRef<HTMLElement>(null);
-  const mobilePanelRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      if (!isOpen || !mobilePanelRef.current) return;
-      gsap.set(mobilePanelRef.current, { opacity: 0, y: -12, scale: 0.96 });
-      gsap.to(mobilePanelRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.35,
-        ease: "back.out(1.7)",
+  // Active-link tracking with a passive scroll listener instead of
+  // ScrollTrigger. A live ScrollTrigger keeps GSAP's ticker requesting
+  // animation frames at display refresh rate for the whole life of the page —
+  // waking the CPU ~60x/second even when the page is completely idle. A
+  // passive scroll listener costs exactly nothing when nothing scrolls.
+  //
+  // Section offsets are measured on mount/resize only (offsetTop is a layout
+  // property read, independent of scroll position), so the scroll handler does
+  // no DOM reads at all and cannot force a reflow.
+  useEffect(() => {
+    let bounds: { href: string; top: number; bottom: number }[] = [];
+
+    const docTop = (el: HTMLElement) => {
+      let y = 0;
+      let node: HTMLElement | null = el;
+      while (node) {
+        y += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+      return y;
+    };
+
+    const measure = () => {
+      bounds = NAV_LINKS.flatMap((link) => {
+        const section = document.querySelector<HTMLElement>(link.href);
+        if (!section) return [];
+        const top = docTop(section);
+        return [{ href: link.href, top, bottom: top + section.offsetHeight }];
       });
-    },
-    { dependencies: [isOpen], scope: navRef },
-  );
+    };
 
-  useGSAP(() => {
-    // ScrollTrigger caches each section's position once (on create/refresh)
-    // instead of reading layout (offsetTop) on every scroll event, so this
-    // can't thrash layout the way a raw scroll listener did.
-    const triggers = NAV_LINKS.map((link) => {
-      const section = document.querySelector<HTMLElement>(link.href);
-      if (!section) return null;
-      return ScrollTrigger.create({
-        trigger: section,
-        start: "top 180px",
-        end: "bottom 180px",
-        onToggle: (self) => {
-          if (self.isActive) setActiveHref(link.href);
-        },
-      });
-    });
+    let current = "#home";
+    const onScroll = () => {
+      const probe = window.scrollY + 180;
+      const hit = bounds.find((b) => probe >= b.top && probe < b.bottom);
+      const next = hit?.href ?? bounds[0]?.href ?? "#home";
+      if (next !== current) {
+        current = next;
+        setActiveHref(next);
+      }
+    };
 
-    return () => triggers.forEach((t) => t?.kill());
+    measure();
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measure, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
   return (
     <nav
-      ref={navRef}
       className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4"
     >
       {/* --- DESKTOP NAV: Stays as a wide bar --- */}
       <div
         className="hidden md:flex justify-center items-center glass rounded-full px-8 py-4 border border-white/20"
         style={{
-          background: "rgba(19, 19, 26, 0.72)",
-          backdropFilter: "blur(28px) saturate(180%)",
-          WebkitBackdropFilter: "blur(28px) saturate(180%)",
+          background: "rgba(19, 19, 26, 0.94)",
         }}
       >
         <div className="flex items-center gap-8">
@@ -110,9 +120,7 @@ export default function NavBar() {
           className={`glass flex items-center justify-center transition-all duration-300 active:scale-95 text-white border border-white/20
             ${isOpen ? "rounded-full p-2 mb-2" : "w-12 h-12 rounded-full"}`}
           style={{
-            background: "rgba(19, 19, 26, 0.72)",
-            backdropFilter: "blur(28px) saturate(180%)",
-            WebkitBackdropFilter: "blur(28px) saturate(180%)",
+            background: "rgba(19, 19, 26, 0.94)",
           }}
         >
           <svg
@@ -142,13 +150,10 @@ export default function NavBar() {
         {/* The Menu Content: Opens as a full-width box */}
         {isOpen && (
           <div
-            ref={mobilePanelRef}
             id="mobile-nav-panel"
-            className="glass w-full rounded-2xl p-6 border border-white/20"
+            className="glass w-full rounded-2xl p-6 border border-white/20 panel-in"
             style={{
-              background: "rgba(19, 19, 26, 0.78)",
-              backdropFilter: "blur(30px) saturate(180%)",
-              WebkitBackdropFilter: "blur(30px) saturate(180%)",
+              background: "rgba(19, 19, 26, 0.96)",
             }}
           >
             <div className="flex flex-col gap-3 ">
