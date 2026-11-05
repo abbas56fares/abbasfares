@@ -14,11 +14,10 @@ export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeHref, setActiveHref] = useState("#home");
 
-  // Active-link tracking with a passive scroll listener instead of
-  // ScrollTrigger. A live ScrollTrigger keeps GSAP's ticker requesting
-  // animation frames at display refresh rate for the whole life of the page —
-  // waking the CPU ~60x/second even when the page is completely idle. A
-  // passive scroll listener costs exactly nothing when nothing scrolls.
+  // Active-link tracking via a passive scroll listener. It animates
+  // nothing and costs exactly nothing when nothing scrolls, and setState
+  // fires only when the active section actually changes (~6 times across a
+  // full page scroll, not once per frame).
   //
   // Section offsets are measured on mount/resize only (offsetTop is a layout
   // property read, independent of scroll position), so the scroll handler does

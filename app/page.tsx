@@ -77,8 +77,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
-      {/* <ChatBot /> */}
     </main>
   );
 }

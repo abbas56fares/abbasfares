@@ -1,6 +1,4 @@
-"use client";
-
-import { JSX, useMemo, useRef, useState } from "react";
+import { JSX } from "react";
 import { FaBrain, FaCloud, FaCode, FaRobot, FaSearch } from "react-icons/fa";
 import {
   SiDocker,
@@ -18,7 +16,7 @@ import {
   SiTailwindcss,
   SiVuedotjs,
 } from "react-icons/si";
-import { useIsMobile } from "../hooks/useIsMobile";
+import Carousel from "./Carousel";
 
 interface Skill {
   name: string;
@@ -145,8 +143,11 @@ const skills: Skill[] = [
 ];
 
 const STACK_SIZE = 4;
-const STACKS_PER_PAGE_DESKTOP = 3;
-const STACKS_PER_PAGE_MOBILE = 1;
+
+const STACKS: Skill[][] = Array.from(
+  { length: Math.ceil(skills.length / STACK_SIZE) },
+  (_, i) => skills.slice(i * STACK_SIZE, i * STACK_SIZE + STACK_SIZE),
+);
 
 // REPLACE YOUR EXISTING SkillCard FUNCTION WITH THIS LIGHTWEIGHT VERSION:
 function SkillCard({ skill }: { skill: Skill }) {
@@ -180,70 +181,17 @@ function SkillCard({ skill }: { skill: Skill }) {
 }
 
 export default function Skills() {
-  const containerRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const [page, setPage] = useState(0);
-  const isMobile = useIsMobile(640);
-
-  const pages = useMemo(() => {
-    const stacksPerPage = isMobile
-      ? STACKS_PER_PAGE_MOBILE
-      : STACKS_PER_PAGE_DESKTOP;
-    const stacks: Skill[][] = [];
-    for (let i = 0; i < skills.length; i += STACK_SIZE) {
-      stacks.push(skills.slice(i, i + STACK_SIZE));
-    }
-    const chunks: Skill[][][] = [];
-    for (let i = 0; i < stacks.length; i += stacksPerPage) {
-      chunks.push(stacks.slice(i, i + stacksPerPage));
-    }
-    return chunks;
-  }, [isMobile]);
-  const pageCount = pages.length;
-  const activePage = Math.min(page, pageCount - 1);
-
-  // Page swap is a keyed remount plus a one-shot CSS fade (see .page-swap),
-  // not a GSAP tween. Any live GSAP tween or ScrollTrigger keeps GSAP's ticker
-  // requesting animation frames at display refresh rate for the life of the
-  // page, waking the CPU ~60x/second even when nothing is happening.
-  const goTo = (next: number) => {
-    const clamped = (next + pageCount) % pageCount;
-    if (clamped !== page) setPage(clamped);
-  };
-
-  // Swipe left/right to navigate pages (touch-action: pan-y lets vertical
-  // page scroll keep working natively while we handle the horizontal axis).
-  const swipeRef = useRef({ x: 0, y: 0, active: false });
-
-  const onSwipeStart = (e: React.PointerEvent) => {
-    swipeRef.current = { x: e.clientX, y: e.clientY, active: true };
-  };
-
-  const onSwipeEnd = (e: React.PointerEvent) => {
-    if (!swipeRef.current.active) return;
-    swipeRef.current.active = false;
-    const dx = e.clientX - swipeRef.current.x;
-    const dy = e.clientY - swipeRef.current.y;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-      goTo(page + (dx < 0 ? 1 : -1));
-    }
-  };
-
   return (
     <section
-      ref={containerRef}
       id="skills"
       className="relative w-full py-32 px-6 md:px-8 overflow-hidden"
     >
       {/* Background Effects */}
       <div className="absolute top-1/3 -right-20 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(125,160,202,0.10),transparent_70%)]" />
-      <div
-        className="absolute bottom-1/3 -left-20 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(84,131,179,0.10),transparent_70%)]"
-        style={{ animationDelay: "2s" }}
-      />
+      <div className="absolute bottom-1/3 -left-20 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(84,131,179,0.10),transparent_70%)]" />
 
       <div className="relative max-w-7xl mx-auto">
-        <div ref={headerRef} className="text-center mb-16">
+        <div className="text-center mb-16">
           <h2 className="heading-fluid font-black mb-4">
             My <span className="text-gradient">Skills</span>
           </h2>
@@ -253,47 +201,25 @@ export default function Skills() {
           </p>
         </div>
 
-        {/* Paginated Skills Carousel */}
-        <div
-          key={activePage}
-          onPointerDown={onSwipeStart}
-          onPointerUp={onSwipeEnd}
-          onPointerCancel={() => (swipeRef.current.active = false)}
-          className="flex flex-wrap justify-center gap-6 px-2 touch-pan-y page-swap"
+        {/* Carousel: same default scroller + dots as Projects. 1 stack per
+            view on phones, 2 on tablets, 3 at lg and up; each basis
+            subtracts its share of the gap so the stacks in view land at
+            exactly 100%. */}
+        <Carousel
+          label="skills"
+          trackClassName="flex gap-6 px-2 overflow-x-auto no-scrollbar overscroll-x-contain"
         >
-          {pages[activePage].map((stack, stackIdx) => (
+          {STACKS.map((stack, stackIdx) => (
             <div
               key={stackIdx}
-              className="flex flex-col gap-4 basis-full sm:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.333%-1rem)] sm:min-h-85"
+              className="shrink-0 flex flex-col gap-4 basis-full sm:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.333%-1rem)]"
             >
               {stack.map((skill) => (
                 <SkillCard key={skill.name} skill={skill} />
               ))}
             </div>
           ))}
-        </div>
-
-        {/* Page Dots. The visual dot stays small; a padded, invisible hit
-            area brings the actual tap target to a touch-friendly size
-            without changing how the dots look. */}
-        {pageCount > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-10">
-            {pages.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                aria-label={`Go to skills page ${i + 1}`}
-                className="relative p-2.5"
-              >
-                <span
-                  className={`block h-2 rounded-full transition-all ${
-                    i === activePage ? "w-8 bg-white" : "w-2 bg-white/40"
-                  }`}
-                />
-              </button>
-            ))}
-          </div>
-        )}
+        </Carousel>
       </div>
     </section>
   );

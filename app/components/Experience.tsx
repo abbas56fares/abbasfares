@@ -1,6 +1,3 @@
-"use client";
-
-import { useRef } from "react";
 import { FaBriefcase, FaGraduationCap, FaCertificate } from "react-icons/fa";
 
 const experience = {
@@ -27,28 +24,23 @@ const certificates = [
 ];
 
 export default function Experience() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const workCardRef = useRef<HTMLDivElement>(null);
-  const bottomRowRef = useRef<HTMLDivElement>(null);
 
   return (
     <section
-      ref={sectionRef}
       id="experience"
       className="relative w-full py-32 px-4 overflow-hidden"
     >
       <div className="absolute top-1/4 -right-20 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(84,131,179,0.10),transparent_70%)]" />
 
       <div className="relative max-w-5xl mx-auto">
-        <div ref={headerRef} className="text-center mb-16">
+        <div className="text-center mb-16">
           <h2 className="heading-fluid font-black mb-4">
             Experience &amp; <span className="text-gradient">Education</span>
           </h2>
         </div>
 
         {/* Work Experience */}
-        <div ref={workCardRef} className="modern-card p-4 sm:p-8 lg:p-10 mb-8">
+        <div className="modern-card p-4 sm:p-8 lg:p-10 mb-8">
           <div className="flex items-start gap-3 sm:gap-5">
             <div className="shrink-0 w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
               <FaBriefcase className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -77,7 +69,7 @@ export default function Experience() {
           </div>
         </div>
 
-        <div ref={bottomRowRef} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Education */}
           <div className="modern-card p-4 sm:p-8">
             <div className="flex flex-col items-center text-center gap-2 sm:flex-row sm:items-start sm:text-left sm:gap-4">
